@@ -97,3 +97,12 @@ class Position:
             children += child.get_children_recursive()
 
         return children
+
+    def get_properties_dict(self):
+        return {
+            "type": "Position", 
+            "script_path": self.script_path, 
+            "children": [self.children[i].get_properties_dict() for i in range(len(self.children))], 
+            "position_x": self.position.x, 
+            "position_y": self.position.y
+        }

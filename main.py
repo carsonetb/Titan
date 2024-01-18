@@ -46,7 +46,7 @@ class EditorHandler:
         self.top_level_nodes = []
         self.background_color = pygame.Vector3(255, 255, 255)
         self.left_sidebar_width = 300
-        self.right_sidebar_width = 300
+        self.right_sidebar_width = 400
         self.origin_offset = pygame.Vector2(self.left_sidebar_width, 0)
         self.project_path = project_path
         self.adding_node = False
@@ -61,6 +61,11 @@ class EditorHandler:
 
     def update(self):
         self.window.fill(self.background_color)
+
+        nodes = []
+
+        for node in self.top_level_nodes:
+            nodes.append(node.get_children_recursive())
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -91,6 +96,9 @@ class EditorHandler:
         rename_node_button = Button(self.window.get_width() - self.right_sidebar_width + 170, 10, 150, 50, 1, 0, (0, 0, 0), (255, 255, 255), "Rename Node", (0, 0, 0), "arial", 20)
         rename_node_button_clicked = rename_node_button.update(self.window)
 
+        save_scene_button = Button(self.window.get_width() - self.right_sidebar_width + 10, 70, 150, 50, 1, 0, (0, 0, 0), (255, 255, 255), "Save Scene", (0, 0, 0), "arial", 20)
+        save_scene_button_clicked = save_scene_button.update(self.window)
+
         if add_node_button_clicked:
             self.adding_node = True
             self.node_dialogue = AddNodeDialogue(200, 200, self.window.get_width() - 400, self.window.get_height() - 400)
@@ -99,6 +107,14 @@ class EditorHandler:
             new_name = tkinter.simpledialog.askstring("Set Name", "New Node Name:")
             if new_name:
                 self.node_hierarchy_display.selected_item.name = new_name
+
+        if save_scene_button_clicked:
+            scene_save_path = tkinter.filedialog.askopenfilename()
+            
+            if scene_save_path:
+                scene_save_file = open(scene_save_path, "w+")
+                scene_save_file.write(str([self.top_level_nodes[i].get_properties_dict() for i in range(len(self.top_level_nodes))]).replace("'", '"'))
+                scene_save_file.close()
         
         if self.adding_node:
             self.node_to_add = self.node_dialogue.update(self.window)
@@ -109,11 +125,6 @@ class EditorHandler:
 
                 self.adding_node = False
                 self.node_dialogue = None
-
-        nodes = []
-
-        for node in self.top_level_nodes:
-            nodes.append(node.get_children_recursive())
 
         self.node_hierarchy_display.items = nodes
         self.node_hierarchy_display.recurse_draw_list(self.window, nodes, 0, 0)

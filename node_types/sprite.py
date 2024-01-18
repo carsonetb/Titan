@@ -19,3 +19,13 @@ class Sprite(Position):
         window.blit(self.image, self.position - pygame.Vector2(self.image.get_width() / 2, self.image.get_height() / 2))
 
         super().game_update(window)
+
+    def get_properties_dict(self):
+        return {
+            "type": "Position", 
+            "script_path": self.script_path, 
+            "children": [self.children[i].get_properties_dict() for i in range(len(self.children))], 
+            "position_x": self.position.x,
+            "position_y": self.position.y, 
+            "sprite_path": self.sprite_path
+        }
