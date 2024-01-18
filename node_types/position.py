@@ -20,6 +20,7 @@ class Position:
         self.mouse_dragging = False
         self.name = "Unnamed"
         self.first_game_update = True
+        self.selected = False
 
     def load_script(self, script_path):
         spec = importlib.util.spec_from_file_location("test_script", script_path)
@@ -45,14 +46,13 @@ class Position:
 
         mouse_pos = pygame.mouse.get_pos()
 
-        if offset_position.distance_to(mouse_pos) < 30:
+        if self.selected and offset_position.distance_to(mouse_pos) < 30:
             pygame.draw.circle(window, (0, 0, 0), offset_position, 15)
 
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.mouse_dragging = True
-                if event.type == pygame.MOUSEBUTTONUP:
-                    self.mouse_dragging = False
+            if pygame.mouse.get_pressed()[0]:
+                self.mouse_dragging = True
+            else:
+                self.mouse_dragging = False
         
         if self.mouse_dragging:
             self.position = mouse_pos - origin_offset
