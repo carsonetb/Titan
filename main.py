@@ -3,7 +3,11 @@ import importlib
 import sys
 from node_types.position import Position
 from node_types.sprite import Sprite
+from resources.button import Button
 from pygame import gfxdraw
+import tkinter
+import tkinter.filedialog
+import json
 
 pygame.init()
 pygame.font.init()
@@ -12,8 +16,8 @@ REG_FONT = pygame.font.SysFont("arial", 32)
 
 
 class EditorHandler:
-    def __init__(self, width, height):
-        self.window = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+    def __init__(self, window):
+        self.window = window
         self.top_level_nodes = []
         self.background_color = pygame.Vector3(255, 255, 255)
         self.left_sidebar_width = 300
@@ -44,19 +48,32 @@ class EditorHandler:
         pygame.display.update()
 
 
+class TitanMainMenu:
+    def __init__(self, width, height):
+        self.window = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+        self.add_project_button = Button(10, 10, 150, 50, 2, 5, (0, 0, 0), (255, 255, 255), "Add Project", (0, 0, 0), "Arial", 20)
+    
+    def update(self):
+        self.window.fill((200, 200, 200))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return 1
+            
+        button_pressed = self.add_project_button.update(self.window)
+
+        if button_pressed:
+            project_path = tkinter.filedialog.askdirectory()
+            
+        pygame.display.update()
+
+
 def main():
-    # Initialize Editor
-    editor = EditorHandler(1800, 1000)
-
-    # Load sprite node to add to scene.
-    sprite = Sprite("/home/cbates8923/TitanEngine/assets/logo.png")
-    sprite.load_script("/home/cbates8923/TitanEngine/test_scripts/test_script.py")
-
-    # Add to nodes.
-    editor.top_level_nodes.append(sprite)
+    # Initialize Main Menu
+    main_menu = TitanMainMenu(1800, 1000)
 
     while True:
-        action_code = editor.update()
+        action_code = main_menu.update()
 
         if action_code == 1:
             break
