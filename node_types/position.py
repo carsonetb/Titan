@@ -58,8 +58,8 @@ class Position:
             self.position = mouse_pos - origin_offset
 
         for child in self.children:
+            child.add_position(self.position - self.previous_position)
             child.editor_update(window, origin_offset)
-            child.position += self.position - self.previous_position
 
         self.previous_position = self.position
     
@@ -85,8 +85,8 @@ class Position:
                 self.position = self.script.position
         
         for child in self.children:
+            child.add_position(self.position - self.previous_position)
             child.game_update(window)
-            child.position += self.position - self.previous_position
         
         self.previous_position = self.position
 
@@ -94,15 +94,35 @@ class Position:
         children = [self]
 
         for child in self.children:
-            children += child.get_children_recursive()
+            children.append(child.get_children_recursive())
 
         return children
+    
+    def add_position(self, added_position):
+        self.position += added_position
+
+        for child in self.children:
+            child.add_position(added_position)
 
     def get_properties_dict(self):
         return {
             "type": "Position", 
+            "name": self.name,
             "script_path": self.script_path, 
             "children": [self.children[i].get_properties_dict() for i in range(len(self.children))], 
             "position_x": self.position.x, 
             "position_y": self.position.y
         }
+    
+    def load_self(self, node):
+        self.script_path = node["script_path"]
+        self.position = pygame.Vector2(node["position_x"], node["position_y"])
+        self.name = node["name"]
+
+        for child in node["children"]:
+            if child["type"] == "Position":
+                node = Position()
+                node.load_self(child)
+                node.previous_position = node.position
+                node.parent = self
+                self.children.append(node)

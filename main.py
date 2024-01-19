@@ -46,10 +46,11 @@ class EditorHandler:
         self.top_level_nodes = []
         self.background_color = pygame.Vector3(255, 255, 255)
         self.left_sidebar_width = 300
-        self.right_sidebar_width = 400
-        self.origin_offset = pygame.Vector2(self.left_sidebar_width, 0)
+        self.right_sidebar_width = 330
+        self.origin_offset = pygame.Vector2(self.left_sidebar_width, 50)
         self.project_path = project_path
         self.adding_node = False
+        self.adding_child = False
         self.node_dialogue = None
         self.selected_node = None
         self.node_hierarchy_display = Hierarchy(30, 50, self.left_sidebar_width - 30)
@@ -81,23 +82,33 @@ class EditorHandler:
         for node in self.top_level_nodes:
             node.editor_update(self.window, self.origin_offset)
 
+        pygame.draw.rect(self.window, (180, 180, 180), (0, 0, self.window.get_width(), 50))
         pygame.draw.rect(self.window, (200, 200, 200), (0, 0, self.left_sidebar_width, self.window.get_height()))
         pygame.draw.rect(self.window, (200, 200, 200), (self.window.get_width() - self.right_sidebar_width, 0, self.right_sidebar_width, self.window.get_height()))
         gfxdraw.line(self.window, self.window.get_width() - self.right_sidebar_width, 0, self.window.get_width() - self.right_sidebar_width, self.window.get_height(), (0, 0, 0))
         gfxdraw.line(self.window, self.left_sidebar_width, 0, self.left_sidebar_width, self.window.get_height(), (0, 0, 0))
         gfxdraw.line(self.window, 0, self.window.get_height() - 400, self.left_sidebar_width, self.window.get_height() - 400, (0, 0, 0))
-        gfxdraw.line(self.window, 0, 50, self.left_sidebar_width, 50, (0, 0, 0))
+        gfxdraw.line(self.window, 0, 50, self.window.get_width() - self.right_sidebar_width, 50, (0, 0, 0))
 
         self.window.blit(self.project_name_text, (10, 10))
 
-        add_node_button = Button(self.window.get_width() - self.right_sidebar_width + 10, 10, 150, 50, 1, 0, (0, 0, 0), (255, 255, 255), "Add Node", (0, 0, 0), "arial", 20)
+        add_node_button = Button(self.window.get_width() - self.right_sidebar_width + 10, 10, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Add Node", (0, 0, 0), "arial", 20)
         add_node_button_clicked = add_node_button.update(self.window)
 
-        rename_node_button = Button(self.window.get_width() - self.right_sidebar_width + 170, 10, 150, 50, 1, 0, (0, 0, 0), (255, 255, 255), "Rename Node", (0, 0, 0), "arial", 20)
+        rename_node_button = Button(self.window.get_width() - self.right_sidebar_width + 170, 10, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Rename Node", (0, 0, 0), "arial", 20)
         rename_node_button_clicked = rename_node_button.update(self.window)
 
-        save_scene_button = Button(self.window.get_width() - self.right_sidebar_width + 10, 70, 150, 50, 1, 0, (0, 0, 0), (255, 255, 255), "Save Scene", (0, 0, 0), "arial", 20)
+        save_scene_button = Button(self.window.get_width() - self.right_sidebar_width + 10, 50, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Save Scene", (0, 0, 0), "arial", 20)
         save_scene_button_clicked = save_scene_button.update(self.window)
+
+        add_child_button = Button(self.window.get_width() - self.right_sidebar_width + 170, 50, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Add Child", (0, 0, 0), "arial", 20)
+        add_child_button_clicked = add_child_button.update(self.window)
+
+        delete_node_button = Button(self.window.get_width() - self.right_sidebar_width / 2 - 75, 90, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Delete Node", (0, 0, 0), "arial", 20)
+        delete_node_button_clicked = delete_node_button.update(self.window)
+
+        load_scene_button = Button(self.left_sidebar_width + 10, 10, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Load Scene", (0, 0, 0), "arial", 20)
+        load_scene_button_clicked = load_scene_button.update(self.window)
 
         if add_node_button_clicked:
             self.adding_node = True
@@ -115,15 +126,35 @@ class EditorHandler:
                 scene_save_file = open(scene_save_path, "w+")
                 scene_save_file.write(str([self.top_level_nodes[i].get_properties_dict() for i in range(len(self.top_level_nodes))]).replace("'", '"'))
                 scene_save_file.close()
-        
+
+        if add_child_button_clicked and self.node_hierarchy_display.selected_item:
+            self.adding_node = True
+            self.adding_child = True
+            self.node_dialogue = AddNodeDialogue(200, 200, self.window.get_width() - 400, self.window.get_height() - 400)
+
+        if delete_node_button_clicked and self.node_hierarchy_display.selected_item:
+            if self.node_hierarchy_display.selected_item.parent != "Root":
+                self.node_hierarchy_display.selected_item.parent.children.pop(self.node_hierarchy_display.selected_item.parent.children.index(self.node_hierarchy_display.selected_item))
+            else:
+                self.top_level_nodes.pop(self.top_level_nodes.index(self.node_hierarchy_display.selected_item))
+            
+            self.node_hierarchy_display.selected_item = None
+
+        if load_scene_button_clicked:
+            self.load_scene(tkinter.filedialog.askopenfilename())
+
         if self.adding_node:
             self.node_to_add = self.node_dialogue.update(self.window)
 
             if self.node_to_add:
                 if self.node_to_add == "Position":
-                    self.top_level_nodes.append(Position())
+                    if self.adding_child and self.node_hierarchy_display.selected_item: 
+                        child = Position(); child.parent = self.node_hierarchy_display.selected_item
+                        self.node_hierarchy_display.selected_item.children.append(child)
+                    else: self.top_level_nodes.append(Position())
 
                 self.adding_node = False
+                self.adding_child = False
                 self.node_dialogue = None
 
         self.node_hierarchy_display.items = nodes
@@ -131,6 +162,17 @@ class EditorHandler:
 
         pygame.display.update()
 
+    def load_scene(self, filename):
+        scene_file = open(filename, "r")
+        data = json.load(scene_file)
+        self.top_level_nodes = []
+
+        for node in data:
+            if node["type"] == "Position":
+                node_to_add = Position()
+                node_to_add.load_self(node)
+                node_to_add.previous_position = node_to_add.position
+                self.top_level_nodes.append(node_to_add)
 
 class TitanMainMenu:
     def __init__(self, width, height):

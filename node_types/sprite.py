@@ -3,20 +3,22 @@ from node_types.position import Position
 
 
 class Sprite(Position):
-    def __init__(self, sprite_path):
-        self.sprite_path = sprite_path
-        self.image = pygame.image.load(self.sprite_path).convert_alpha()
+    def __init__(self):
+        self.sprite_path = None
+        self.image = None
         self.node_type = "Sprite"
 
         Position.__init__(self)
 
     def editor_update(self, window, origin_offset):
-        window.blit(self.image, origin_offset + self.position - pygame.Vector2(self.image.get_width() / 2, self.image.get_height() / 2))
+        if self.sprite_path:
+            window.blit(self.image, origin_offset + self.position - pygame.Vector2(self.image.get_width() / 2, self.image.get_height() / 2))
 
         super().editor_update(window, origin_offset)
 
     def game_update(self, window):
-        window.blit(self.image, self.position - pygame.Vector2(self.image.get_width() / 2, self.image.get_height() / 2))
+        if self.sprite_path:
+            window.blit(self.image, self.position - pygame.Vector2(self.image.get_width() / 2, self.image.get_height() / 2))
 
         super().game_update(window)
 
@@ -29,3 +31,12 @@ class Sprite(Position):
             "position_y": self.position.y, 
             "sprite_path": self.sprite_path
         }
+    
+    def load_self(self, node):
+        super().load_self(node)
+    
+        self.sprite_path = node["sprite_path"]
+
+    def add_sprite(self, path):
+        self.sprite_path = path
+        self.image = pygame.image.load(path).convert_alpha()
