@@ -89,26 +89,27 @@ class EditorHandler:
         gfxdraw.line(self.window, self.left_sidebar_width, 0, self.left_sidebar_width, self.window.get_height(), (0, 0, 0))
         gfxdraw.line(self.window, 0, self.window.get_height() - 400, self.left_sidebar_width, self.window.get_height() - 400, (0, 0, 0))
         gfxdraw.line(self.window, 0, 50, self.window.get_width() - self.right_sidebar_width, 50, (0, 0, 0))
+        gfxdraw.line(self.window, self.window.get_width() - self.right_sidebar_width, 90, self.window.get_width(), 90, (0, 0, 0))
 
         self.window.blit(self.project_name_text, (10, 10))
 
         add_node_button = Button(self.window.get_width() - self.right_sidebar_width + 10, 10, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Add Node", (0, 0, 0), "arial", 20)
         add_node_button_clicked = add_node_button.update(self.window)
 
-        rename_node_button = Button(self.window.get_width() - self.right_sidebar_width + 170, 10, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Rename Node", (0, 0, 0), "arial", 20)
+        rename_node_button = Button(self.window.get_width() - self.right_sidebar_width + 170, 50, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Rename Node", (0, 0, 0), "arial", 20)
         rename_node_button_clicked = rename_node_button.update(self.window)
 
-        save_scene_button = Button(self.window.get_width() - self.right_sidebar_width + 10, 50, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Save Scene", (0, 0, 0), "arial", 20)
-        save_scene_button_clicked = save_scene_button.update(self.window)
-
-        add_child_button = Button(self.window.get_width() - self.right_sidebar_width + 170, 50, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Add Child", (0, 0, 0), "arial", 20)
+        add_child_button = Button(self.window.get_width() - self.right_sidebar_width + 170, 10, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Add Child", (0, 0, 0), "arial", 20)
         add_child_button_clicked = add_child_button.update(self.window)
 
-        delete_node_button = Button(self.window.get_width() - self.right_sidebar_width / 2 - 75, 90, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Delete Node", (0, 0, 0), "arial", 20)
+        delete_node_button = Button(self.window.get_width() - self.right_sidebar_width + 10, 50, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Delete Node", (0, 0, 0), "arial", 20)
         delete_node_button_clicked = delete_node_button.update(self.window)
 
         load_scene_button = Button(self.left_sidebar_width + 10, 10, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Load Scene", (0, 0, 0), "arial", 20)
         load_scene_button_clicked = load_scene_button.update(self.window)
+
+        save_scene_button = Button(self.left_sidebar_width + 170, 10, 150, 30, 1, 0, (0, 0, 0), (255, 255, 255), "Save Scene", (0, 0, 0), "arial", 20)
+        save_scene_button_clicked = save_scene_button.update(self.window)
 
         if add_node_button_clicked:
             self.adding_node = True
@@ -147,11 +148,14 @@ class EditorHandler:
             self.node_to_add = self.node_dialogue.update(self.window)
 
             if self.node_to_add:
-                if self.node_to_add == "Position":
-                    if self.adding_child and self.node_hierarchy_display.selected_item: 
-                        child = Position(); child.parent = self.node_hierarchy_display.selected_item
-                        self.node_hierarchy_display.selected_item.children.append(child)
-                    else: self.top_level_nodes.append(Position())
+                if self.node_to_add == "Position": child = Position()
+                if self.node_to_add == "Sprite": child = Sprite()
+                    
+                if self.adding_child and self.node_hierarchy_display.selected_item: 
+                    child.parent = self.node_hierarchy_display.selected_item
+                    self.node_hierarchy_display.selected_item.children.append(child)
+                else: 
+                    self.top_level_nodes.append(child)
 
                 self.adding_node = False
                 self.adding_child = False
@@ -234,6 +238,7 @@ class TitanMainMenu:
 def main():
     # Initialize Main Menu
     main_menu = TitanMainMenu(1800, 1000)
+    pygame.display.set_caption("Titan Engine")
 
     while True:
         action_code = main_menu.update()
