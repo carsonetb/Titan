@@ -12,12 +12,14 @@ import copy
 pygame.init()
 
 raylib.SetConfigFlags(raylib.FLAG_WINDOW_RESIZABLE)
+raylib.SetConfigFlags(raylib.FLAG_MSAA_4X_HINT)
 raylib.InitWindow(1800, 1000, b"Titan Game Engine")
 
 from node_types import Position
 from node_types import Sprite
 from resources.button import Button
 from resources.list import Hierarchy
+from resources.ticker import Ticker
 
 ARIAL_FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
 
@@ -61,22 +63,8 @@ class EditorHandler:
 
         project_data_file = open(project_path + "/data.json", "r")
         self.project_data = json.load(project_data_file)
-
-    def update(self):
-        raylib.BeginDrawing()
-        raylib.ClearBackground(raylib.RAYWHITE)
-
-        nodes = []
-        
-        if self.node_hierarchy_display.selected_item:
-            self.selected_node = self.node_hierarchy_display.selected_item
-
-        for node in self.top_level_nodes:
-            nodes.append(node.get_children_recursive())
-
-        for node in self.top_level_nodes:
-            node.editor_update(self.origin_offset)
-
+    
+    def _draw_engine_sections(self):
         raylib.DrawRectangle(0, 0, raylib.GetScreenWidth(), 50, (180, 180, 180))
         raylib.DrawRectangle(0, 0, self.left_sidebar_width, raylib.GetScreenHeight(), (200, 200, 200))
         raylib.DrawRectangle(raylib.GetScreenWidth() - self.right_sidebar_width, 0, self.right_sidebar_width, raylib.GetScreenHeight(), (200, 200, 200))
@@ -86,8 +74,7 @@ class EditorHandler:
         raylib.DrawLine(0, 50, raylib.GetScreenWidth() - self.right_sidebar_width, 50, (0, 0, 0, 255))
         raylib.DrawLine(raylib.GetScreenWidth() - self.right_sidebar_width, 90, raylib.GetScreenWidth(), 90, (0, 0, 0, 255))
 
-        raylib.DrawTextEx(ARIAL_FONT, bytes(self.project_data["name"], 'utf-8'), (10, 10), 30, 3, (0, 0, 0, 255))
-
+    def _draw_engine_constant_buttons(self):
         add_node_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10, 10, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Add Node", (0, 0, 0, 255), "arial", 20)
         add_node_button_clicked = add_node_button.update()
 
@@ -139,33 +126,90 @@ class EditorHandler:
         if load_scene_button_clicked:
             self.load_scene(tkinter.filedialog.askopenfilename())
 
+    def _draw_sprite_specific_options(self, position_addon: pygame.Vector2):
+        mod_texture_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 0), b"Attach Texture" if not self.selected_node.sprite_path else b"Remove Texture", (0, 0, 0, 255), "arial", 20)
+        
+        if mod_texture_button.update():
+            self.selected_node.set_texture(tkinter.filedialog.askopenfilename())
+    
+    def _draw_position_specific_options(self, position_addon: pygame.Vector2):
+        mod_position_x_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y, 150, 30, 0, 20, self.selected_node.position.x)
+        mod_position_y_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20, self.selected_node.position.y)
+
+        raylib.DrawTextEx(ARIAL_FONT, "Position X".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
+        raylib.DrawTextEx(ARIAL_FONT, "Position Y".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 140 + position_addon.y), 30, 3, raylib.BLACK)
+
+        mod_position_x_ticker.update()
+        mod_position_y_ticker.update()
+
+        self.selected_node.add_position(pygame.Vector2(mod_position_x_ticker.value - self.selected_node.position.x, mod_position_y_ticker.value - self.selected_node.position.y))
+
+    def _update_add_node_dialogue(self):
+        self.node_to_add = self.node_dialogue.update()
+
+        if self.node_to_add:
+            if self.node_to_add == "Position": child = Position()
+            if self.node_to_add == "Sprite": child = Sprite()
+                
+            if self.adding_child and self.selected_node: 
+                child.parent = self.selected_node
+                self.selected_node.children.append(child)
+            else: 
+                self.top_level_nodes.append(child)
+
+            self.adding_node = False
+            self.adding_child = False
+            self.node_dialogue = None
+
+    def _get_nodes_hierarchy(self):
+        nodes = []
+
+        for node in self.top_level_nodes:
+            nodes.append(node.get_children_recursive())
+        
+        return nodes
+
+    def update(self):
+        raylib.BeginDrawing()
+        raylib.ClearBackground(raylib.RAYWHITE)
+
+        # IMPORTANT: Update all nodes!
+        for node in self.top_level_nodes:
+            node.editor_update(self.origin_offset)
+        
+        # Set selected_node variable.
+        if self.node_hierarchy_display.selected_item:
+            self.selected_node = self.node_hierarchy_display.selected_item
+
+        # Get nodes hierarchy.
+        nodes = self._get_nodes_hierarchy()
+
+        # Draw project title.
+        raylib.DrawTextEx(ARIAL_FONT, bytes(self.project_data["name"], 'utf-8'), (10, 10), 30, 3, (0, 0, 0, 255))
+
+        # Draw engine section lines and rectangles.
+        self._draw_engine_sections()
+
+        # Draw buttons located in the top right corner of the screen.
+        self._draw_engine_constant_buttons()
+
+        # Draw options for position.
+        if self.selected_node and self.selected_node.node_type == "Position":
+            self._draw_position_specific_options(pygame.Vector2(0, 0))
+
         # Draw options for sprite.
         if self.selected_node and self.selected_node.node_type == "Sprite":
-            mod_texture_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10, 100, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 0), b"Attach Texture" if not self.selected_node.sprite_path else b"Remove Texture", (0, 0, 0, 255), "arial", 20)
-            
-            if mod_texture_button.update():
-                self.selected_node.set_texture(tkinter.filedialog.askopenfilename())
+            self._draw_sprite_specific_options(pygame.Vector2(0, 0))
 
+        # Handle adding new node if we're doing that.
         if self.adding_node:
-            self.node_to_add = self.node_dialogue.update()
+            self._update_add_node_dialogue()
 
-            if self.node_to_add:
-                if self.node_to_add == "Position": child = Position()
-                if self.node_to_add == "Sprite": child = Sprite()
-                    
-                if self.adding_child and self.selected_node: 
-                    child.parent = self.selected_node
-                    self.selected_node.children.append(child)
-                else: 
-                    self.top_level_nodes.append(child)
-
-                self.adding_node = False
-                self.adding_child = False
-                self.node_dialogue = None
-
+        # Update node hierarchy display.
         self.node_hierarchy_display.items = nodes
         self.node_hierarchy_display.recurse_draw_list(nodes, 0, 0)
 
+        # Draw debug FPS in the top left corner.
         raylib.DrawFPS(10, 10)
 
         raylib.EndDrawing()

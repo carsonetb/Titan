@@ -13,7 +13,7 @@ class Position:
         self.position = pygame.Vector2(0, 0)
         self.previous_position = pygame.Vector2(0, 0)
         self.scale = pygame.Vector2(1, 1)
-        self.previous_scale = pygame.Vector2(0, 0)
+        self.previous_scale = pygame.Vector2(1, 1)
         self.children = []
         self.parent = "Root"
         self.script_has_update = "Untested"
@@ -69,6 +69,7 @@ class Position:
             child.editor_update(origin_offset)
 
         self.previous_position = self.position
+        self.previous_scale = self.scale
     
     def game_update(self):
         if self.has_script:
@@ -109,6 +110,7 @@ class Position:
 
         for child in self.children:
             child.add_scale(added_scale)
+            child.position *= added_scale
 
     def get_children_recursive(self):
         children = [self]
@@ -190,6 +192,8 @@ class Sprite(Position):
             "children": [self.children[i].get_properties_dict() for i in range(len(self.children))], 
             "position_x": self.position.x,
             "position_y": self.position.y, 
+            "scale_x": self.scale.x,
+            "scale_y": self.scale.y,
             "sprite_path": self.sprite_path if self.sprite_path else "None"
         }
     
@@ -200,10 +204,3 @@ class Sprite(Position):
         if self.sprite_path:
             self.set_texture(self.sprite_path)
 
-    def add_sprite(self, path):
-        self.sprite_path = path
-        image = raylib.LoadImage(self.sprite_path)
-        self.image = raylib.LoadTextureFromImage(image)
-        self.image_width = image.width
-        self.image_height = image.height
-        raylib.UnloadImage(image)
