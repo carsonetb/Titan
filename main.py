@@ -9,17 +9,21 @@ import tkinter.simpledialog
 import json
 import copy
 
+import resources.global_enumerations
+
 pygame.init()
 
 raylib.SetConfigFlags(raylib.FLAG_WINDOW_RESIZABLE)
 raylib.SetConfigFlags(raylib.FLAG_MSAA_4X_HINT)
 raylib.InitWindow(1800, 1000, b"Titan Game Engine")
+raylib.SetExitKey(0)
 
 from node_types import Position
 from node_types import Sprite
 from resources.button import Button
 from resources.list import Hierarchy
 from resources.ticker import Ticker
+from resources import global_enumerations
 import resources.misc
 
 ARIAL_FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
@@ -36,7 +40,7 @@ class AddNodeDialogue:
         self.y = y
         self.position_button = Button(self.x + 10, self.y + 10, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Position", (0, 0, 0, 255), "arial", 20)
         self.sprite_button = Button(self.x + 10, self.y + 40, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Sprite", (0, 0, 0, 255), "arial", 20)
-    
+
     def update(self):
         raylib.DrawRectangle(self.x, self.y, self.width, self.height, (170, 170, 170, 255))
         raylib.DrawLine(self.x, self.y, self.x + self.width, self.y, (0, 0, 0, 255))
@@ -44,8 +48,11 @@ class AddNodeDialogue:
         raylib.DrawLine(self.x + self.width, self.y, self.x + self.width, self.y + self.height, (0, 0, 0, 255))
         raylib.DrawLine(self.x, self.y + self.height, self.x + self.width, self.y + self.height, (0, 0, 0, 255))
 
-        if self.position_button.update(): return "Position"
-        if self.sprite_button.update(): return "Sprite"
+        if self.position_button.update(): return global_enumerations.NODE_POSITION
+        if self.sprite_button.update(): return global_enumerations.NODE_SPRITE
+
+        if raylib.IsKeyDown(raylib.KEY_ESCAPE):
+            return global_enumerations.EXIT
 
 
 class EditorHandler:
@@ -184,8 +191,13 @@ class EditorHandler:
         self.node_to_add = self.node_dialogue.update()
 
         if self.node_to_add:
-            if self.node_to_add == "Position": child = Position()
-            if self.node_to_add == "Sprite": child = Sprite()
+            if self.node_to_add == global_enumerations.NODE_POSITION: child = Position()
+            if self.node_to_add == global_enumerations.NODE_SPRITE: child = Sprite()
+            if self.node_to_add == global_enumerations.EXIT:
+                self.adding_node = False
+                self.adding_child = False
+                self.node_dialogue = False
+                return
                 
             if self.adding_child and self.selected_node: 
                 child.parent = self.selected_node
