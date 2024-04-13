@@ -9,25 +9,32 @@ import tkinter.simpledialog
 import json
 import copy
 
-import resources.global_enumerations
-
+# Initialise pygame.
 pygame.init()
 
+# Initialise raylib.
 raylib.SetConfigFlags(raylib.FLAG_WINDOW_RESIZABLE)
 raylib.SetConfigFlags(raylib.FLAG_MSAA_4X_HINT)
 raylib.InitWindow(1800, 1000, b"Titan Game Engine")
 raylib.SetExitKey(0)
 
+# Load node types
 from node_types import Position
 from node_types import Sprite
+from node_types import Shape
+
+# Load editor resources.
 from resources.button import Button
 from resources.list import Hierarchy
 from resources.ticker import Ticker
 from resources import global_enumerations
+import resources.enum
 import resources.misc
 
+# Load fonts.
 ARIAL_FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
 
+# [DEPRECATED] Create pygame fonts.
 REG_FONT = pygame.font.SysFont("arial", 11)
 TITLE_FONT = pygame.font.SysFont("arial", 40)
 SUBTITLE_FONT = pygame.font.SysFont("arial", 30)
@@ -40,6 +47,7 @@ class AddNodeDialogue:
         self.y = y
         self.position_button = Button(self.x + 10, self.y + 10, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Position", (0, 0, 0, 255), "arial", 20)
         self.sprite_button = Button(self.x + 10, self.y + 40, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Sprite", (0, 0, 0, 255), "arial", 20)
+        self.shape_button = Button(self.x + 10, self.y + 70, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Shape", (0, 0, 0, 255), "arial", 20) 
 
     def update(self):
         raylib.DrawRectangle(self.x, self.y, self.width, self.height, (170, 170, 170, 255))
@@ -50,6 +58,7 @@ class AddNodeDialogue:
 
         if self.position_button.update(): return global_enumerations.NODE_POSITION
         if self.sprite_button.update(): return global_enumerations.NODE_SPRITE
+        if self.shape_button.update(): return global_enumerations.NODE_SHAPE
 
         if raylib.IsKeyDown(raylib.KEY_ESCAPE):
             return global_enumerations.EXIT
@@ -71,6 +80,9 @@ class EditorHandler:
 
         project_data_file = open(project_path + "/data.json", "r")
         self.project_data = json.load(project_data_file)
+
+        # Node UI specific variables.
+        self.shape_type_enum = None
     
     def _draw_engine_sections(self):
         raylib.DrawRectangle(0, 0, raylib.GetScreenWidth(), 50, (180, 180, 180))
@@ -149,6 +161,26 @@ class EditorHandler:
 
         self._draw_position_specific_options(pygame.Vector2(position_addon.x, position_addon.y + 80))
     
+    def _draw_shape_specific_options(self, position_addon: pygame.Vector2):
+        # Shape label.
+        raylib.DrawTextEx(ARIAL_FONT, "Inherits: Shape".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
+
+        dynamic_position_addon_y = 80
+
+        if not self.shape_type_enum:
+            self.shape_type_enum = resources.enum.EnumSelectionMenu({
+                "Rectangle": global_enumerations.SHAPE_RECT,
+                "Circle": global_enumerations.SHAPE_CIRCLE,
+                "Line": global_enumerations.SHAPE_LINE,
+                "Polygon": global_enumerations.SHAPE_POLYGON, 
+            }, "Rectangle", raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20)
+
+        self.shape_type_enum.position.x = raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x
+
+        updated_shape_type = self.shape_type_enum.update()
+        if updated_shape_type:
+            self.selected_node.shape_index = self.shape_type_enum.enum.enum[self.shape_type_enum.enum.item_selected]
+
     def _draw_position_specific_options(self, position_addon: pygame.Vector2):
         # Position label.
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Position".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
@@ -193,6 +225,7 @@ class EditorHandler:
         if self.node_to_add:
             if self.node_to_add == global_enumerations.NODE_POSITION: child = Position()
             if self.node_to_add == global_enumerations.NODE_SPRITE: child = Sprite()
+            if self.node_to_add == global_enumerations.NODE_SHAPE: child = Shape()
             if self.node_to_add == global_enumerations.EXIT:
                 self.adding_node = False
                 self.adding_child = False
@@ -241,13 +274,14 @@ class EditorHandler:
         # Draw buttons located in the top right corner of the screen.
         self._draw_engine_constant_buttons()
 
-        # Draw options for position.
-        if self.selected_node and self.selected_node.node_type == "Position":
-            self._draw_position_specific_options(pygame.Vector2(0, 0))
-
-        # Draw options for sprite.
-        if self.selected_node and self.selected_node.node_type == "Sprite":
-            self._draw_sprite_specific_options(pygame.Vector2(0, 0))
+        # Draw deticated menu items for selected object.
+        if self.selected_node:
+            if self.selected_node.node_type == "Position":
+                self._draw_position_specific_options(pygame.Vector2(0, 0))
+            if self.selected_node.node_type == "Sprite":
+                self._draw_sprite_specific_options(pygame.Vector2(0, 0))
+            if self.selected_node.node_type == "Shape":
+                self._draw_shape_specific_options(pygame.Vector2(0, 0))
 
         # Handle adding new node if we're doing that.
         if self.adding_node:
@@ -270,14 +304,14 @@ class EditorHandler:
         for node in data:
             if node["type"] == "Position":
                 node_to_add = Position()
-                node_to_add.load_self(node)
-                node_to_add.previous_position = node_to_add.position
-                self.top_level_nodes.append(node_to_add)
             elif node["type"] == "Sprite":
                 node_to_add = Sprite()
-                node_to_add.load_self(node)
-                node_to_add.previous_position = node_to_add.position
-                self.top_level_nodes.append(node_to_add)
+            elif node["type"] == "Shape":
+                node_to_add = Shape()
+
+            node_to_add.load_self(node)
+            node_to_add.previous_position = node_to_add.position
+            self.top_level_nodes.append(node_to_add)
 
 class TitanMainMenu:
     def __init__(self):
