@@ -128,6 +128,8 @@ class EditorHandler:
             file_path = tkinter.filedialog.askopenfilename()
             if resources.misc.is_filename_valid(file_path):
                 self.load_scene(file_path)
+            else:
+                print("Warning: Invalid sprite path.")
 
     def _draw_sprite_specific_options(self, position_addon: pygame.Vector2):
         # Sprite label.
@@ -152,6 +154,9 @@ class EditorHandler:
         mod_scale_x_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 240 + position_addon.y, 150, 30, 0, 20, self.selected_node.scale.x, 0.1)
         mod_scale_y_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 280 + position_addon.y, 150, 30, 0, 20, self.selected_node.scale.y, 0.1)
 
+        # Rotation ticker.
+        mod_rotation_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 340 + position_addon.y, 150, 30, 0, 20, self.selected_node.rotation_degrees, 1)
+
         # Position labels.
         raylib.DrawTextEx(ARIAL_FONT, "Position X".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 140 + position_addon.y), 30, 3, raylib.BLACK)
         raylib.DrawTextEx(ARIAL_FONT, "Position Y".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y), 30, 3, raylib.BLACK)
@@ -160,14 +165,20 @@ class EditorHandler:
         raylib.DrawTextEx(ARIAL_FONT, "Scale X".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 240 + position_addon.y), 30, 3, raylib.BLACK)
         raylib.DrawTextEx(ARIAL_FONT, "Scale Y".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 280 + position_addon.y), 30, 3, raylib.BLACK)
 
+        # Rotation label.
+        raylib.DrawTextEx(ARIAL_FONT, "Rotation".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 340 + position_addon.y), 30, 3, raylib.BLACK)
+
         # Update tickers.
         mod_position_x_ticker.update()
         mod_position_y_ticker.update()
         mod_scale_x_ticker.update()
         mod_scale_y_ticker.update()
+        mod_rotation_ticker.update()
 
+        # Modify values changed by tickers.
         self.selected_node.add_position(pygame.Vector2(mod_position_x_ticker.value - self.selected_node.position.x, mod_position_y_ticker.value - self.selected_node.position.y))
         self.selected_node.add_scale(pygame.Vector2(mod_scale_x_ticker.value - self.selected_node.scale.x, mod_scale_y_ticker.value - self.selected_node.scale.y))
+        self.selected_node.add_rotation(resources.misc.deg_to_rad(mod_rotation_ticker.value) - self.selected_node.rotation)
 
     def _update_add_node_dialogue(self):
         self.node_to_add = self.node_dialogue.update()

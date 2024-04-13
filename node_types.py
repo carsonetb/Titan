@@ -5,6 +5,8 @@ import sys
 from pygame import gfxdraw
 import random
 
+import resources.misc
+
 class Position:
     def __init__(self):
         self.script_path = ""
@@ -14,6 +16,8 @@ class Position:
         self.previous_position = pygame.Vector2(0, 0)
         self.scale = pygame.Vector2(1, 1)
         self.previous_scale = pygame.Vector2(1, 1)
+        self.rotation = 0
+        self.rotation_degrees = 0
         self.children = []
         self.parent = "Root"
         self.script_has_update = "Untested"
@@ -105,12 +109,25 @@ class Position:
         for child in self.children:
             child.add_position(added_position)
 
-    def add_scale(self, added_scale):
+    def add_scale(self, added_scale: pygame.Vector2):
+        if added_scale == pygame.Vector2(0, 0):
+            return
+
         self.scale += added_scale
 
         for child in self.children:
             child.add_scale(added_scale)
-            child.position *= added_scale
+            child.position += pygame.Vector2((child.position - self.position).x * added_scale.x, (child.position - self.position).y * added_scale.y)
+
+    def add_rotation(self, added_rotation: float):
+        self.rotation += added_rotation
+        self.rotation_degrees = resources.misc.rad_to_deg(self.rotation)
+
+        for child in self.children:
+            position_to_rotate = child.position - self.position
+            rotated_position = position_to_rotate.rotate_rad(added_rotation)
+            child.position = self.position + rotated_position
+            child.add_rotation(added_rotation)
 
     def get_children_recursive(self):
         children = [self]
@@ -166,13 +183,13 @@ class Sprite(Position):
 
     def editor_update(self, origin_offset):
         if self.sprite_path:
-            raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(self.position.x - self.image_width / 2), int(self.position.y - self.image_height / 2), self.image_width * self.scale.x, self.image_height * self.scale.y], [0, 0], 0.0, raylib.WHITE)
+            raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(self.position.x - self.image_width / 2), int(self.position.y - self.image_height / 2), self.image_width * self.scale.x, self.image_height * self.scale.y], [0, 0], self.rotation_degrees, raylib.WHITE)
 
         super().editor_update(origin_offset)
 
     def game_update(self):
         if self.sprite_path:
-            raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(self.position.x - self.image_width / 2), int(self.position.y - self.image_height / 2), self.image_width * self.scale.x, self.image_height * self.scale.y], [0, 0], 0.0, raylib.WHITE)
+            raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(self.position.x - self.image_width / 2), int(self.position.y - self.image_height / 2), self.image_width * self.scale.x, self.image_height * self.scale.y], [0, 0], self.rotation_degrees, raylib.WHITE)
 
         super().game_update()
 
