@@ -20,6 +20,7 @@ from node_types import Sprite
 from resources.button import Button
 from resources.list import Hierarchy
 from resources.ticker import Ticker
+import resources.misc
 
 ARIAL_FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
 
@@ -124,25 +125,49 @@ class EditorHandler:
             self.selected_node = None
 
         if load_scene_button_clicked:
-            self.load_scene(tkinter.filedialog.askopenfilename())
+            file_path = tkinter.filedialog.askopenfilename()
+            if resources.misc.is_filename_valid(file_path):
+                self.load_scene(file_path)
 
     def _draw_sprite_specific_options(self, position_addon: pygame.Vector2):
-        mod_texture_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 0), b"Attach Texture" if not self.selected_node.sprite_path else b"Remove Texture", (0, 0, 0, 255), "arial", 20)
+        # Sprite label.
+        raylib.DrawTextEx(ARIAL_FONT, "Inherits: Sprite".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
+        
+        mod_texture_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 0), b"Attach Texture" if not self.selected_node.sprite_path else b"Remove Texture", (0, 0, 0, 255), "arial", 20)
         
         if mod_texture_button.update():
             self.selected_node.set_texture(tkinter.filedialog.askopenfilename())
+
+        self._draw_position_specific_options(pygame.Vector2(position_addon.x, position_addon.y + 80))
     
     def _draw_position_specific_options(self, position_addon: pygame.Vector2):
-        mod_position_x_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y, 150, 30, 0, 20, self.selected_node.position.x)
-        mod_position_y_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20, self.selected_node.position.y)
+        # Position label.
+        raylib.DrawTextEx(ARIAL_FONT, "Inherits: Position".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
 
-        raylib.DrawTextEx(ARIAL_FONT, "Position X".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
-        raylib.DrawTextEx(ARIAL_FONT, "Position Y".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 140 + position_addon.y), 30, 3, raylib.BLACK)
+        # Position tickers.
+        mod_position_x_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20, self.selected_node.position.x)
+        mod_position_y_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 0, 20, self.selected_node.position.y)
 
+        # Scale tickers.
+        mod_scale_x_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 240 + position_addon.y, 150, 30, 0, 20, self.selected_node.scale.x, 0.1)
+        mod_scale_y_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 280 + position_addon.y, 150, 30, 0, 20, self.selected_node.scale.y, 0.1)
+
+        # Position labels.
+        raylib.DrawTextEx(ARIAL_FONT, "Position X".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 140 + position_addon.y), 30, 3, raylib.BLACK)
+        raylib.DrawTextEx(ARIAL_FONT, "Position Y".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y), 30, 3, raylib.BLACK)
+
+        # Scale labels.
+        raylib.DrawTextEx(ARIAL_FONT, "Scale X".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 240 + position_addon.y), 30, 3, raylib.BLACK)
+        raylib.DrawTextEx(ARIAL_FONT, "Scale Y".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 280 + position_addon.y), 30, 3, raylib.BLACK)
+
+        # Update tickers.
         mod_position_x_ticker.update()
         mod_position_y_ticker.update()
+        mod_scale_x_ticker.update()
+        mod_scale_y_ticker.update()
 
         self.selected_node.add_position(pygame.Vector2(mod_position_x_ticker.value - self.selected_node.position.x, mod_position_y_ticker.value - self.selected_node.position.y))
+        self.selected_node.add_scale(pygame.Vector2(mod_scale_x_ticker.value - self.selected_node.scale.x, mod_scale_y_ticker.value - self.selected_node.scale.y))
 
     def _update_add_node_dialogue(self):
         self.node_to_add = self.node_dialogue.update()
