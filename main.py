@@ -85,9 +85,9 @@ class EditorHandler:
         self.shape_type_enum = None
     
     def _draw_engine_sections(self):
-        raylib.DrawRectangle(0, 0, raylib.GetScreenWidth(), 50, (180, 180, 180))
-        raylib.DrawRectangle(0, 0, self.left_sidebar_width, raylib.GetScreenHeight(), (200, 200, 200))
-        raylib.DrawRectangle(raylib.GetScreenWidth() - self.right_sidebar_width, 0, self.right_sidebar_width, raylib.GetScreenHeight(), (200, 200, 200))
+        raylib.DrawRectangle(0, 0, raylib.GetScreenWidth(), 50, (180, 180, 180, 255))
+        raylib.DrawRectangle(0, 0, self.left_sidebar_width, raylib.GetScreenHeight(), (200, 200, 200, 255))
+        raylib.DrawRectangle(raylib.GetScreenWidth() - self.right_sidebar_width, 0, self.right_sidebar_width, raylib.GetScreenHeight(), (200, 200, 200, 255))
         raylib.DrawLine(raylib.GetScreenWidth() - self.right_sidebar_width, 0, raylib.GetScreenWidth() - self.right_sidebar_width, raylib.GetScreenHeight(), (0, 0, 0, 255))
         raylib.DrawLine(self.left_sidebar_width, 0, self.left_sidebar_width, raylib.GetScreenHeight(), (0, 0, 0, 255))
         raylib.DrawLine(0, raylib.GetScreenHeight() - 400, self.left_sidebar_width, raylib.GetScreenHeight() - 400, (0, 0, 0, 255))
@@ -234,6 +234,9 @@ class EditorHandler:
                 
             if self.adding_child and self.selected_node: 
                 child.parent = self.selected_node
+                child.position = child.parent.position
+                child.scale = child.parent.scale
+                child.rotation = child.parent.rotation
                 self.selected_node.children.append(child)
             else: 
                 self.top_level_nodes.append(child)
