@@ -167,6 +167,69 @@ class EditorHandler:
 
         dynamic_position_addon_y = 80
 
+        if self.selected_node.shape_index == global_enumerations.SHAPE_RECT:
+            # Width/height tickers.
+            mod_width_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 0, 20, self.selected_node.width, 5)
+            mod_height_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 220 + position_addon.y, 150, 30, 0, 20, self.selected_node.height, 5)
+
+            # Width/height labels.
+            raylib.DrawTextEx(ARIAL_FONT, "Width".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y), 30, 3, raylib.BLACK)
+            raylib.DrawTextEx(ARIAL_FONT, "Height".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 220 + position_addon.y), 30, 3, raylib.BLACK)
+
+            # Update tickers.
+            mod_width_ticker.update()
+            mod_height_ticker.update()
+
+            # Modify values changed by tickers.
+            self.selected_node.width = mod_width_ticker.value
+            self.selected_node.height = mod_height_ticker.value
+
+            dynamic_position_addon_y += 80
+
+        if self.selected_node.shape_index == global_enumerations.SHAPE_CIRCLE:
+            # Radius ticker.
+            mod_radius_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 0, 20, self.selected_node.radius, 5)
+
+            # Radius labels.
+            raylib.DrawTextEx(ARIAL_FONT, "Radius".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y), 30, 3, raylib.BLACK)
+
+            # Update ticker.
+            mod_radius_ticker.update()
+
+            # Modify value changed by ticker.
+            self.selected_node.radius = mod_radius_ticker.value
+
+            dynamic_position_addon_y += 40
+
+        if self.selected_node.shape_index == global_enumerations.SHAPE_POLYGON or self.selected_node.shape_index == global_enumerations.SHAPE_LINE:
+            # Create position tickers.
+            position_tickers = []
+
+            for i in range(len(self.selected_node.points)):
+                position_tickers.append(Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y + i * 80, 150, 30, 0, 20, self.selected_node.points_real_positions[i][0], 5))
+                position_tickers.append(Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 220 + position_addon.y + i * 80, 150, 30, 0, 20, self.selected_node.points_real_positions[i][1], 5))
+
+            # Draw position labels.
+            for i in range(len(self.selected_node.points)):
+                raylib.DrawTextEx(ARIAL_FONT, f"Position {i} X".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y + i * 80), 25, 3, raylib.BLACK)
+                raylib.DrawTextEx(ARIAL_FONT, f"Position {i} Y".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 220 + position_addon.y + i * 80), 25, 3, raylib.BLACK)
+
+            # Update position tickers.
+            for ticker in position_tickers:
+                ticker.update()
+
+            # Modify values changed by tickers.
+            for i in range(len(position_tickers)):
+                if i % 2 == 0:
+                    self.selected_node.points_real_positions[i // 2] = (position_tickers[i].value, self.selected_node.points_real_positions[i // 2][1])
+                else:
+                    self.selected_node.points_real_positions[i // 2] = (self.selected_node.points_real_positions[i // 2][0], position_tickers[i].value)
+
+            self.selected_node.update_polygon_points(self.selected_node.points_real_positions)
+
+            dynamic_position_addon_y += len(position_tickers) * 40
+
+        # Enumeration for shape type.
         if not self.shape_type_enum:
             self.shape_type_enum = resources.enum.EnumSelectionMenu({
                 "Rectangle": global_enumerations.SHAPE_RECT,
@@ -180,6 +243,8 @@ class EditorHandler:
         updated_shape_type = self.shape_type_enum.update()
         if updated_shape_type:
             self.selected_node.shape_index = self.shape_type_enum.enum.enum[self.shape_type_enum.enum.item_selected]
+
+        self._draw_position_specific_options(pygame.Vector2(0, dynamic_position_addon_y))
 
     def _draw_position_specific_options(self, position_addon: pygame.Vector2):
         # Position label.

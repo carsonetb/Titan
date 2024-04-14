@@ -284,7 +284,6 @@ class Shape(Position):
             raylib.DrawLineStrip(self.points_real_positions, len(self.points), self.color)
 
         if self.shape_index == global_enumerations.SHAPE_POLYGON:
-            print(self.triangulated_polygon)
             for triangle in self.triangulated_polygon:
                 raylib.DrawTriangle(triangle[0], triangle[1], triangle[2], self.color)
 
@@ -322,7 +321,7 @@ class Shape(Position):
         return unsorted_triangles
 
     def update_polygon_points(self, points):
-        self.points = points
+        self.points_real_positions = points
         self.triangulated_polygon = self._triangulate_polygon(points)
 
     def get_properties_dict(self):
