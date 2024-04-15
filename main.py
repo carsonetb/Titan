@@ -165,16 +165,26 @@ class EditorHandler:
         # Shape label.
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Shape".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
 
-        dynamic_position_addon_y = 80
+        # Color button.
+        change_color_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 1, 0, raylib.BLACK, raylib.WHITE, b"Change Color", raylib.BLACK, "loller", 20)
+
+        # Update color button.
+        changing_color = change_color_button.update()
+
+        if changing_color:
+            # Needs a bunch of code for a dialogue that changes the color.
+            pass 
+
+        dynamic_position_addon_y = 120
 
         if self.selected_node.shape_index == global_enumerations.SHAPE_RECT:
             # Width/height tickers.
-            mod_width_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 0, 20, self.selected_node.width, 5)
-            mod_height_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 220 + position_addon.y, 150, 30, 0, 20, self.selected_node.height, 5)
+            mod_width_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y + 40, 150, 30, 0, 20, self.selected_node.width, 5)
+            mod_height_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 220 + position_addon.y + 40, 150, 30, 0, 20, self.selected_node.height, 5)
 
             # Width/height labels.
-            raylib.DrawTextEx(ARIAL_FONT, "Width".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y), 30, 3, raylib.BLACK)
-            raylib.DrawTextEx(ARIAL_FONT, "Height".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 220 + position_addon.y), 30, 3, raylib.BLACK)
+            raylib.DrawTextEx(ARIAL_FONT, "Width".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y + 40), 30, 3, raylib.BLACK)
+            raylib.DrawTextEx(ARIAL_FONT, "Height".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 220 + position_addon.y + 40), 30, 3, raylib.BLACK)
 
             # Update tickers.
             mod_width_ticker.update()
@@ -188,10 +198,10 @@ class EditorHandler:
 
         if self.selected_node.shape_index == global_enumerations.SHAPE_CIRCLE:
             # Radius ticker.
-            mod_radius_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 0, 20, self.selected_node.radius, 5)
+            mod_radius_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y + 40, 150, 30, 0, 20, self.selected_node.radius, 5)
 
             # Radius labels.
-            raylib.DrawTextEx(ARIAL_FONT, "Radius".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y), 30, 3, raylib.BLACK)
+            raylib.DrawTextEx(ARIAL_FONT, "Radius".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y + 40), 30, 3, raylib.BLACK)
 
             # Update ticker.
             mod_radius_ticker.update()
@@ -206,13 +216,13 @@ class EditorHandler:
             position_tickers = []
 
             for i in range(len(self.selected_node.points)):
-                position_tickers.append(Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y + i * 80, 150, 30, 0, 20, self.selected_node.points_real_positions[i][0], 5))
-                position_tickers.append(Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 220 + position_addon.y + i * 80, 150, 30, 0, 20, self.selected_node.points_real_positions[i][1], 5))
+                position_tickers.append(Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y + 40 + i * 80, 150, 30, 0, 20, self.selected_node.points_real_positions[i][0], 5))
+                position_tickers.append(Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 220 + position_addon.y + 40 + i * 80, 150, 30, 0, 20, self.selected_node.points_real_positions[i][1], 5))
 
             # Draw position labels.
             for i in range(len(self.selected_node.points)):
-                raylib.DrawTextEx(ARIAL_FONT, f"Position {i} X".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y + i * 80), 25, 3, raylib.BLACK)
-                raylib.DrawTextEx(ARIAL_FONT, f"Position {i} Y".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 220 + position_addon.y + i * 80), 25, 3, raylib.BLACK)
+                raylib.DrawTextEx(ARIAL_FONT, f"Position {i} X".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y + 40 + i * 80), 25, 3, raylib.BLACK)
+                raylib.DrawTextEx(ARIAL_FONT, f"Position {i} Y".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 220 + position_addon.y + 40 + i * 80), 25, 3, raylib.BLACK)
 
             # Update position tickers.
             for ticker in position_tickers:
