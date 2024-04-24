@@ -1,5 +1,6 @@
 import raylib
 import resources.timer
+from resources import global_enumerations
 
 
 FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
@@ -25,7 +26,10 @@ class Button:
             mouse_pressed = raylib.IsMouseButtonDown(raylib.MOUSE_BUTTON_LEFT)
             
             if mouse_just_pressed:
-                return 1
+                return global_enumerations.BUTTON_JUST_PRESSED
+            
+            if mouse_pressed:
+                return global_enumerations.BUTTON_PRESSED
 
             if mouse_pressed:
                 self.held_down_timer.start()
@@ -42,6 +46,46 @@ class Button:
             self.held_down = True
 
         if self.held_down:
-            return 1
+            return global_enumerations.BUTTON_NOT_INTERACTED
 
-        return 0
+        return global_enumerations.BUTTON_NOT_INTERACTED
+    
+class InvisibleButton:
+    def __init__(self, x, y, width, height):
+        self.x, self.y, self.width, self.height = x, y, width, height
+        self.held_down_timer = resources.timer.Timer(0.5, False, True)
+        self.held_down = False
+
+    def update(self):
+        mouse_pos = raylib.GetMousePosition()
+
+        if mouse_pos.x > self.x and mouse_pos.x < self.x + self.width and mouse_pos.y > self.y and mouse_pos.y < self.y + self.height:
+            mouse_just_pressed = raylib.IsMouseButtonPressed(raylib.MOUSE_BUTTON_LEFT)
+            mouse_pressed = raylib.IsMouseButtonDown(raylib.MOUSE_BUTTON_LEFT)
+            
+            if mouse_just_pressed:
+                return global_enumerations.BUTTON_JUST_PRESSED
+            
+            if mouse_pressed:
+                return global_enumerations.BUTTON_PRESSED
+
+            if mouse_pressed:
+                self.held_down_timer.start()
+            else:
+                self.held_down_timer.stop()
+                self.held_down = False
+
+            return global_enumerations.BUTTON_HOVERED
+        else:
+            self.held_down_timer.stop()
+            self.held_down = False
+
+        increase_fast = self.held_down_timer.update(raylib.GetFrameTime())
+
+        if increase_fast:
+            self.held_down = True
+
+        if self.held_down:
+            return global_enumerations.BUTTON_NOT_INTERACTED
+
+        return global_enumerations.BUTTON_NOT_INTERACTED

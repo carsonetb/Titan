@@ -9,6 +9,8 @@ import numpy
 
 import resources.misc
 from resources import global_enumerations
+from resources.button import Button
+from resources.button import InvisibleButton
 
 class Position:
     def __init__(self):
@@ -31,6 +33,7 @@ class Position:
         self.first_game_update = True
         self.selected = False
         self.just_moved = False
+        self.eligable_for_dragging = False
 
     def load_script(self, script_path):
         spec = importlib.util.spec_from_file_location("test_script", script_path)
@@ -63,10 +66,15 @@ class Position:
         if self.selected and offset_position.distance_to(mouse_pos) < 30:
             raylib.DrawCircle(int(offset_position.x), int(offset_position.y), 15, (0, 0, 0, 255))
 
-            if raylib.IsMouseButtonDown(raylib.MOUSE_BUTTON_LEFT):
+            if raylib.IsMouseButtonPressed(raylib.MOUSE_BUTTON_LEFT):
+                self.eligable_for_dragging = True
+
+            if raylib.IsMouseButtonDown(raylib.MOUSE_BUTTON_LEFT) and self.eligable_for_dragging:
                 self.mouse_dragging = True
             else:
                 self.mouse_dragging = False
+        else:
+            self.eligable_for_dragging = False
         
         if self.mouse_dragging:
             self.position = mouse_pos - origin_offset
@@ -184,6 +192,7 @@ class Position:
                 node_to_add.parent = self
                 self.children.append(node_to_add)
 
+
 class Sprite(Position):
     def __init__(self):
         Position.__init__(self)
@@ -277,6 +286,50 @@ class Shape(Position):
         if self.shape_index == global_enumerations.SHAPE_RECT:
             raylib.DrawRectangle(int(offset_position.x - self.width / 2), int(offset_position.y - self.height / 2), int(self.width), int(self.height), self.color)
         
+            # Draw rectangle resize UI only if node is selected.
+            if self.selected:
+                raylib.DrawRectangleLines(int(offset_position.x - self.width / 2), int(offset_position.y - self.height / 2), int(self.width), int(self.height), raylib.YELLOW)
+
+                # Get mouse position.
+                mouse_position = raylib.GetMousePosition()
+
+                # Draw resize circles for rectangle corners.
+                raylib.DrawCircleLines(int(offset_position.x - self.width / 2), int(offset_position.y - self.height / 2), 5, raylib.YELLOW)
+                raylib.DrawCircleLines(int(offset_position.x + self.width / 2), int(offset_position.y - self.height / 2), 5, raylib.YELLOW)
+                raylib.DrawCircleLines(int(offset_position.x - self.width / 2), int(offset_position.y + self.height / 2), 5, raylib.YELLOW)
+                raylib.DrawCircleLines(int(offset_position.x + self.width / 2), int(offset_position.y + self.height / 2), 5, raylib.YELLOW)
+
+                # Initialize buttons for rectangle corners.
+                top_left_corner_button     = InvisibleButton(offset_position.x - self.width / 2 - 10, offset_position.y - self.height / 2 - 10, 20, 20)
+                top_right_corner_button    = InvisibleButton(offset_position.x + self.width / 2 - 10, offset_position.y - self.height / 2 - 10, 20, 20)
+                bottom_left_corner_button  = InvisibleButton(offset_position.x - self.width / 2 - 10, offset_position.y + self.height / 2 - 10, 20, 20)
+                bottom_right_corner_button = InvisibleButton(offset_position.x + self.width / 2 - 10, offset_position.y + self.height / 2 - 10, 20, 20)
+
+                # Get outputs from buttons this frame.
+                top_left_corner_button_output     = top_left_corner_button.update()
+                top_right_corner_button_output    = top_right_corner_button.update()
+                bottom_left_corner_button_output  = bottom_left_corner_button.update()
+                bottom_right_corner_button_output = bottom_right_corner_button.update()
+
+                # Do stuff based on outputs.
+                if top_left_corner_button_output == global_enumerations.BUTTON_PRESSED:
+                    corner_offset_x = offset_position.x - self.width / 2 - mouse_position.x
+                    corner_offset_y = offset_position.y - self.height / 2 - mouse_position.y
+
+                    self.add_position(pygame.Vector2(-corner_offset_x * (1/3), -corner_offset_y * (1/3)))
+                    self.width += corner_offset_x * (2/3)
+                    self.height += corner_offset_y * (2/3)
+
+                if top_right_corner_button_output == global_enumerations.BUTTON_PRESSED:
+                    corner_offset_x = (offset_position.x + self.width / 2) - mouse_position.x
+                    corner_offset_y = (offset_position.y - self.height / 2) - mouse_position.y
+
+                    print(mouse_position.x, (offset_position.x + self.width / 2))
+
+                    self.add_position(pygame.Vector2(-corner_offset_x * (1/3), -corner_offset_y * (1/3)))
+                    self.width += corner_offset_x * (2/3)
+                    self.height += corner_offset_y * (2/3)
+
         if self.shape_index == global_enumerations.SHAPE_CIRCLE:
             raylib.DrawCircle(int(offset_position.x), int(offset_position.y), self.radius, self.color)
 

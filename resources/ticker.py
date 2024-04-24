@@ -1,6 +1,7 @@
 import raylib
 import pygame
 import resources.button
+from resources import global_enumerations
 
 
 FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
@@ -28,7 +29,7 @@ class Ticker:
         button_down_size = raylib.MeasureTextEx(FONT, "<".encode("ascii"), self.font_size, 3)
         button_down = resources.button.Button(self.position.x + self.dimensions.x - button_up_size.x - button_down_size.x - 10, self.position.y, button_up_size.x + 5, self.dimensions.y, 1, 0.1, raylib.BLACK, raylib.WHITE, "<", raylib.BLACK, "rowar", self.font_size)
 
-        if button_up.update():
+        if button_up.update() == global_enumerations.BUTTON_JUST_PRESSED:
             self.value += self.increment_value
-        if button_down.update():
+        if button_down.update() == global_enumerations.BUTTON_JUST_PRESSED:
             self.value -= self.increment_value

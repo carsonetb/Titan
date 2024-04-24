@@ -56,9 +56,9 @@ class AddNodeDialogue:
         raylib.DrawLine(self.x + self.width, self.y, self.x + self.width, self.y + self.height, (0, 0, 0, 255))
         raylib.DrawLine(self.x, self.y + self.height, self.x + self.width, self.y + self.height, (0, 0, 0, 255))
 
-        if self.position_button.update(): return global_enumerations.NODE_POSITION
-        if self.sprite_button.update(): return global_enumerations.NODE_SPRITE
-        if self.shape_button.update(): return global_enumerations.NODE_SHAPE
+        if self.position_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_POSITION
+        if self.sprite_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_SPRITE
+        if self.shape_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_SHAPE
 
         if raylib.IsKeyDown(raylib.KEY_ESCAPE):
             return global_enumerations.EXIT
@@ -96,22 +96,22 @@ class EditorHandler:
 
     def _draw_engine_constant_buttons(self):
         add_node_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10, 10, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Add Node", (0, 0, 0, 255), "arial", 20)
-        add_node_button_clicked = add_node_button.update()
+        add_node_button_clicked = add_node_button.update() == global_enumerations.BUTTON_JUST_PRESSED
 
         rename_node_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 170, 50, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Rename Node", (0, 0, 0, 255), "arial", 20)
-        rename_node_button_clicked = rename_node_button.update()
+        rename_node_button_clicked = rename_node_button.update() == global_enumerations.BUTTON_JUST_PRESSED
 
         add_child_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 170, 10, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Add Child", (0, 0, 0, 255), "arial", 20)
-        add_child_button_clicked = add_child_button.update()
+        add_child_button_clicked = add_child_button.update() == global_enumerations.BUTTON_JUST_PRESSED
 
         delete_node_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10, 50, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Delete Node", (0, 0, 0, 255), "arial", 20)
-        delete_node_button_clicked = delete_node_button.update()
+        delete_node_button_clicked = delete_node_button.update() == global_enumerations.BUTTON_JUST_PRESSED
 
         load_scene_button = Button(self.left_sidebar_width + 10, 10, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Load Scene", (0, 0, 0, 255), "arial", 20)
-        load_scene_button_clicked = load_scene_button.update()
+        load_scene_button_clicked = load_scene_button.update() == global_enumerations.BUTTON_JUST_PRESSED
 
         save_scene_button = Button(self.left_sidebar_width + 170, 10, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Save Scene", (0, 0, 0, 255), "arial", 20)
-        save_scene_button_clicked = save_scene_button.update()
+        save_scene_button_clicked = save_scene_button.update() == global_enumerations.BUTTON_JUST_PRESSED
 
         if add_node_button_clicked:
             self.adding_node = True
@@ -156,7 +156,7 @@ class EditorHandler:
         
         mod_texture_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 0), b"Attach Texture" if not self.selected_node.sprite_path else b"Remove Texture", (0, 0, 0, 255), "arial", 20)
         
-        if mod_texture_button.update():
+        if mod_texture_button.update() == global_enumerations.BUTTON_JUST_PRESSED:
             self.selected_node.set_texture(tkinter.filedialog.askopenfilename())
 
         self._draw_position_specific_options(pygame.Vector2(position_addon.x, position_addon.y + 80))
@@ -169,7 +169,7 @@ class EditorHandler:
         change_color_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 1, 0, raylib.BLACK, raylib.WHITE, b"Change Color", raylib.BLACK, "loller", 20)
 
         # Update color button.
-        changing_color = change_color_button.update()
+        changing_color = change_color_button.update() == global_enumerations.BUTTON_JUST_PRESSED
 
         if changing_color:
             # Needs a bunch of code for a dialogue that changes the color.
@@ -343,14 +343,14 @@ class EditorHandler:
         # Get nodes hierarchy.
         nodes = self._get_nodes_hierarchy()
 
-        # Draw project title.
-        raylib.DrawTextEx(ARIAL_FONT, bytes(self.project_data["name"], 'utf-8'), (10, 10), 30, 3, (0, 0, 0, 255))
-
         # Draw engine section lines and rectangles.
         self._draw_engine_sections()
 
         # Draw buttons located in the top right corner of the screen.
         self._draw_engine_constant_buttons()
+
+        # Draw project title.
+        raylib.DrawTextEx(ARIAL_FONT, bytes(self.project_data["name"], 'utf-8'), (10, 10), 30, 3, (0, 0, 0, 255))
 
         # Draw deticated menu items for selected object.
         if self.selected_node:
@@ -370,7 +370,7 @@ class EditorHandler:
         self.node_hierarchy_display.recurse_draw_list(nodes, 0, 0)
 
         # Draw debug FPS in the top left corner.
-        raylib.DrawFPS(10, 10)
+        raylib.DrawFPS(10, raylib.GetScreenHeight() - 30)
 
         raylib.EndDrawing()
 
@@ -406,7 +406,7 @@ class TitanMainMenu:
             project_list_file = open("projects.json")
             projects = json.load(project_list_file)
                 
-            button_pressed = self.add_project_button.update()
+            button_pressed = self.add_project_button.update() == global_enumerations.BUTTON_JUST_PRESSED
 
             if button_pressed:
                 project_path = tkinter.filedialog.askdirectory()
@@ -428,7 +428,7 @@ class TitanMainMenu:
                 button = copy.copy(self.open_project_button)
                 button.x = raylib.GetScreenWidth() - button.width - 10
                 button.y = 200 + i * 100 - 5
-                start_proj_clicked = button.update()
+                start_proj_clicked = button.update() == global_enumerations.BUTTON_JUST_PRESSED
                 raylib.DrawLine(0, 200 + i * 100 - 30, raylib.GetScreenWidth(), 200 + i * 100 - 30, (0, 0, 0, 255))
                 raylib.DrawLine(0, 200 + i * 100 + 70, raylib.GetScreenWidth(), 200 + i * 100 + 70, (0, 0, 0, 255))
 
@@ -442,7 +442,7 @@ class TitanMainMenu:
             raylib.EndDrawing()
         
         else:
-            return self.editor_container.update()
+            return self.editor_container.update() == global_enumerations.BUTTON_JUST_PRESSED
 
 
 def main():
