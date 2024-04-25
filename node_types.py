@@ -333,12 +333,68 @@ class Shape(Position):
         if self.shape_index == global_enumerations.SHAPE_CIRCLE:
             raylib.DrawCircle(int(offset_position.x), int(offset_position.y), self.radius, self.color)
 
+            if self.selected:
+                # Get mouse position.
+                mouse_position = raylib.GetMousePosition()
+
+                # Draw yellow selection icons.
+                raylib.DrawCircleLines(int(offset_position.x), int(offset_position.y), self.radius, raylib.YELLOW)
+                raylib.DrawCircleLines(int(offset_position.x + self.radius), int(offset_position.y), 5, raylib.YELLOW)
+
+                # Button for changing radius.
+                change_radius_button = InvisibleButton(int(offset_position.x + self.radius - 10), int(offset_position.y - 10), 20, 20)
+                change_radius_button_output = change_radius_button.update()
+
+                # Change radius if mouse is dragging.
+                if change_radius_button_output == global_enumerations.BUTTON_PRESSED:
+                    self.radius = mouse_position.x - offset_position.x
+
         if self.shape_index == global_enumerations.SHAPE_LINE:
             raylib.DrawLineStrip(self.points_real_positions, len(self.points), self.color)
+
+            if self.selected:
+                # Get mouse position.
+                mouse_position = raylib.GetMousePosition()
+
+                for point in self.points_real_positions:
+                    # Draw yellow selection icon on each point.
+                    raylib.DrawCircleLines(int(point[0]), int(point[1]), 5, raylib.YELLOW)
+
+                    # Button for moving point.
+                    change_point_button = InvisibleButton(int(point[0] - 10), int(point[1] - 10), 20, 20)
+                    change_point_button_output = change_point_button.update()
+
+                    # Change point if mouse is dragging.
+                    if change_point_button_output == global_enumerations.BUTTON_PRESSED:
+                        self.points[self.points_real_positions.index(point)] = (mouse_position.x - offset_position.x, mouse_position.y - offset_position.y)
+                       
+                        for point_index in range(len(self.points)):
+                            self.points_real_positions[point_index] = (self.points[point_index][0] + offset_position.x, self.points[point_index][1] + offset_position.y)
 
         if self.shape_index == global_enumerations.SHAPE_POLYGON:
             for triangle in self.triangulated_polygon:
                 raylib.DrawTriangle(triangle[0], triangle[1], triangle[2], self.color)
+
+            if self.selected:
+                # Get mouse position.
+                mouse_position = raylib.GetMousePosition()
+
+                for point in self.points_real_positions:
+                    # Draw yellow selection icon on each point.
+                    raylib.DrawCircleLines(int(point[0]), int(point[1]), 5, raylib.YELLOW)
+
+                    # Button for moving point.
+                    change_point_button = InvisibleButton(int(point[0] - 10), int(point[1] - 10), 20, 20)
+                    change_point_button_output = change_point_button.update()
+
+                    # Change point if mouse is dragging.
+                    if change_point_button_output == global_enumerations.BUTTON_PRESSED:
+                        self.points[self.points_real_positions.index(point)] = (mouse_position.x - offset_position.x, mouse_position.y - offset_position.y)
+                       
+                        for point_index in range(len(self.points)):
+                            self.points_real_positions[point_index] = (self.points[point_index][0] + offset_position.x, self.points[point_index][1] + offset_position.y)
+
+                        self.triangulated_polygon = self._triangulate_polygon(self.points_real_positions)
 
         super().editor_update(origin_offset)
 

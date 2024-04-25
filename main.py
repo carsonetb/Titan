@@ -212,6 +212,13 @@ class EditorHandler:
             dynamic_position_addon_y += 40
 
         if self.selected_node.shape_index == global_enumerations.SHAPE_POLYGON or self.selected_node.shape_index == global_enumerations.SHAPE_LINE:
+            # Button for adding a point.
+            add_point_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y, 150, 30, 1, 0, raylib.BLACK, raylib.WHITE, b"Add Point", raylib.BLACK, "skib", 20)
+
+            if add_point_button.update() == global_enumerations.BUTTON_JUST_PRESSED:
+                self.selected_node.points_real_positions.append((0, 0))
+                self.selected_node.points.append((0, 0))
+            
             # Create position tickers.
             position_tickers = []
 
