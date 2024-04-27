@@ -6,6 +6,7 @@ from pygame import gfxdraw
 import random
 import tripy
 import numpy
+import copy
 
 import resources.misc
 from resources import global_enumerations
@@ -179,18 +180,15 @@ class Position:
         for child in node["children"]:
             if child["type"] == "Position":
                 node_to_add = Position()
-                node_to_add.load_self(child)
-                node_to_add.previous_position = node_to_add.position
-                node_to_add.previous_scale = node_to_add.scale
-                node_to_add.parent = self
-                self.children.append(node_to_add)
             elif child["type"] == "Sprite":
                 node_to_add = Sprite()
-                node_to_add.load_self(child)
-                node_to_add.previous_position = node_to_add.position
-                node_to_add.previous_scale = node_to_add.scale
-                node_to_add.parent = self
-                self.children.append(node_to_add)
+            elif child["type"] == "Shape":
+                node_to_add = Shape()
+
+            node_to_add.load_self(child)
+            node_to_add.previous_position = node_to_add.position
+            node_to_add.previous_scale = node_to_add.scale
+            self.children.append(node_to_add)
 
 
 class Sprite(Position):
@@ -311,7 +309,7 @@ class Shape(Position):
                 bottom_left_corner_button_output  = bottom_left_corner_button.update()
                 bottom_right_corner_button_output = bottom_right_corner_button.update()
 
-                # Do stuff based on outputs.
+                # Math for handling movement of corners!
                 if top_left_corner_button_output == global_enumerations.BUTTON_PRESSED:
                     corner_offset_x = offset_position.x - self.width / 2 - mouse_position.x
                     corner_offset_y = offset_position.y - self.height / 2 - mouse_position.y
@@ -321,12 +319,26 @@ class Shape(Position):
                     self.height += corner_offset_y * (2/3)
 
                 if top_right_corner_button_output == global_enumerations.BUTTON_PRESSED:
-                    corner_offset_x = (offset_position.x + self.width / 2) - mouse_position.x
-                    corner_offset_y = (offset_position.y - self.height / 2) - mouse_position.y
+                    corner_offset_x = mouse_position.x - (offset_position.x + self.width / 2)
+                    corner_offset_y = offset_position.y - self.height / 2 - mouse_position.y
 
-                    print(mouse_position.x, (offset_position.x + self.width / 2))
+                    self.add_position(pygame.Vector2(corner_offset_x * (1/3), -corner_offset_y * (1/3)))
+                    self.width += corner_offset_x * (2/3)
+                    self.height += corner_offset_y * (2/3)
 
-                    self.add_position(pygame.Vector2(-corner_offset_x * (1/3), -corner_offset_y * (1/3)))
+                if bottom_left_corner_button_output == global_enumerations.BUTTON_PRESSED:
+                    corner_offset_x = offset_position.x - self.width / 2 - mouse_position.x
+                    corner_offset_y = mouse_position.y - (offset_position.y + self.height / 2)
+
+                    self.add_position(pygame.Vector2(-corner_offset_x * (1/3), corner_offset_y * (1/3)))
+                    self.width += corner_offset_x * (2/3)
+                    self.height += corner_offset_y * (2/3)
+
+                if bottom_right_corner_button_output == global_enumerations.BUTTON_PRESSED:
+                    corner_offset_x = mouse_position.x - (offset_position.x + self.width / 2)
+                    corner_offset_y = mouse_position.y - (offset_position.y + self.height / 2)
+
+                    self.add_position(pygame.Vector2(corner_offset_x * (1/3), corner_offset_y * (1/3)))
                     self.width += corner_offset_x * (2/3)
                     self.height += corner_offset_y * (2/3)
 
@@ -434,6 +446,12 @@ class Shape(Position):
         self.triangulated_polygon = self._triangulate_polygon(points)
 
     def get_properties_dict(self):
+        # Convert points list to json acceptable format.
+        converted_points = []
+
+        for point in self.points:
+            converted_points.append(list(point))
+
         return {
             "type": "Shape", 
             "name": self.name,
@@ -448,7 +466,7 @@ class Shape(Position):
             "rectangle_width": self.width,
             "rectangle_height": self.height,
             "circle_radius": self.radius,
-            "points": self.points,
+            "points": converted_points,
         }
 
     def load_self(self, node):
@@ -459,4 +477,4 @@ class Shape(Position):
         self.height = node["rectangle_height"]
         self.radius = node["circle_radius"]
         self.points = node["points"]
-        self.triangulated_polygon = self._triangulate_polygon(points)
+        self.triangulated_polygon = self._triangulate_polygon(self.points)

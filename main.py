@@ -396,6 +396,7 @@ class EditorHandler:
 
             node_to_add.load_self(node)
             node_to_add.previous_position = node_to_add.position
+            node_to_add.previous_scale = node_to_add.scale
             self.top_level_nodes.append(node_to_add)
 
 class TitanMainMenu:
