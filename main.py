@@ -126,9 +126,7 @@ class EditorHandler:
             scene_save_path = tkinter.filedialog.askopenfilename()
             
             if scene_save_path:
-                scene_save_file = open(scene_save_path, "w+")
-                scene_save_file.write(str([self.top_level_nodes[i].get_properties_dict() for i in range(len(self.top_level_nodes))]).replace("'", '"'))
-                scene_save_file.close()
+                self.save_scene(scene_save_path)
 
         if add_child_button_clicked and self.selected_node:
             self.adding_node = True
@@ -335,6 +333,9 @@ class EditorHandler:
         
         return nodes
 
+    def _draw_play_stop_buttons(self):
+        pass
+
     def update(self):
         raylib.BeginDrawing()
         raylib.ClearBackground(raylib.RAYWHITE)
@@ -382,10 +383,29 @@ class EditorHandler:
         raylib.EndDrawing()
 
     def load_scene(self, filename):
+        # Save scene before loading another one.
+        save_scene_path = json.load(open(self.project_path + "/data.json", "r"))["current_scene"]        
+        self.save_scene(save_scene_path)
+
+        # Load scene file.
         scene_file = open(filename, "r")
         data = json.load(scene_file)
+
+        # Clear nodes.
         self.top_level_nodes = []
 
+        # Set the previously opened scene.
+        project_global_data_file = open(self.project_path + "/data.json", "r")
+        project_global_data = json.load(project_global_data_file)
+        project_global_data["current_scene"] = filename
+        project_global_data_file.close()
+
+        # Write to data file.
+        project_global_data_file = open(self.project_path + "/data.json", "w")
+        project_global_data_file.write(str(project_global_data).replace("'", '"'))
+
+        # Loop through top level nodes and add them in ...
+        # nodes will add their own children.
         for node in data:
             if node["type"] == "Position":
                 node_to_add = Position()
@@ -394,25 +414,62 @@ class EditorHandler:
             elif node["type"] == "Shape":
                 node_to_add = Shape()
 
+            # Nodes loads itself ... will add it's children.
             node_to_add.load_self(node)
+
+            # Set previous position of nodes because that isn't saved.
             node_to_add.previous_position = node_to_add.position
             node_to_add.previous_scale = node_to_add.scale
             self.top_level_nodes.append(node_to_add)
+
+    # Save scene at path.
+    def save_scene(self, scene_save_path):
+        scene_save_file = open(scene_save_path, "w+")
+        scene_save_file.write(str([self.top_level_nodes[i].get_properties_dict() for i in range(len(self.top_level_nodes))]).replace("'", '"'))
+        scene_save_file.close()
 
 class TitanMainMenu:
     def __init__(self):
         self.running_project = False
         self.editor_container = None
+
+    def prepare_for_close(self):
+        print("WARNING: Unprecedented close detected!")
+
+        save_scene_path = json.load(open(self.editor_container.project_path + "/data.json", "r"))["current_scene"]        
+        self.editor_container.save_scene(save_scene_path)
     
     def update(self):
         self.add_project_button = Button(10, 10, 150, 50, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Add Project", (0, 0, 0, 255), b"assets/Arimo-VariableFont_wght.ttf", 20)
         self.open_project_button = Button(0, 0, 200, 50, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Open Project", (0, 0, 0, 255), b"assets/Arimo-VariableFont_wght.ttf", 20)
+        
         if not self.running_project:
             raylib.BeginDrawing()
             raylib.ClearBackground(raylib.RAYWHITE)
 
-            project_list_file = open("projects.json")
-            projects = json.load(project_list_file)
+            try:
+                project_list_file = open("projects.json", "r")
+            except:
+                print("ERROR: Global project list file does not exist in directory ... creating project list file.")
+
+                project_list_file = open("projects.json", "x")
+                project_list_file.write("[]")
+                project_list_file.close()
+
+                return
+
+            try:
+                projects = json.load(project_list_file)
+            except Exception as error_message:
+                print("ERROR: Failed to parse global project list json file (although file exists). Dumping json parse error ...")
+                print(error_message)
+                print("Clearing global project list ...")
+
+                project_list_file = open("projects.json", "w")
+                project_list_file.write("[]")
+                project_list_file.close()
+
+                return
                 
             button_pressed = self.add_project_button.update() == global_enumerations.BUTTON_JUST_PRESSED
 
@@ -443,6 +500,14 @@ class TitanMainMenu:
                 if start_proj_clicked:
                     self.running_project = True
                     self.editor_container = EditorHandler(projects[i])
+
+                    # If current scene exists, load it automatically.
+                    with open(projects[i] + "/data.json") as project_file:
+                        project_data = json.load(project_file)
+
+                        if project_data["current_scene"] != "":
+                            self.editor_container.load_scene(project_data["current_scene"])
+
                     return
                 
             raylib.DrawFPS(10, 10)
@@ -460,6 +525,7 @@ def main():
     while not raylib.WindowShouldClose():
         main_menu.update()
     
+    main_menu.prepare_for_close()
     raylib.CloseWindow()
 
 main()
