@@ -6,6 +6,7 @@ import tkinter.simpledialog
 import json
 import copy
 import multiprocessing
+import os
 
 # Initialise pygame.
 pygame.init()
@@ -33,7 +34,10 @@ import resources.misc
 import run_game
 
 # Load fonts.
-ARIAL_FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
+if os.path.exists("assets/Arimo-VariableFont_wght.ttf"):
+    ARIAL_FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
+else:
+    ARIAL_FONT = raylib.LoadFont(os.path.join(os.path.dirname(__file__), "Arimo-VariableFont_wght.ttf").encode("utf-8"))
 
 # [DEPRECATED] Create pygame fonts.
 REG_FONT = pygame.font.SysFont("arial", 11)
@@ -475,17 +479,19 @@ class EditorHandler:
         scene_save_file.close()
 
 class TitanMainMenu:
-    def __init__(self):
+    def __init__(self, local_data_path):
         self.running_project = False
         self.editor_container = None
+        self.local_data_path = local_data_path
 
     def prepare_for_close(self):
         print("WARNING: Unprecedented close detected!")
 
-        save_scene_path = json.load(open(self.editor_container.project_path + "/data.json", "r"))["current_scene"]        
-        
-        if save_scene_path:
-            self.editor_container.save_scene(save_scene_path)
+        if self.editor_container:
+            save_scene_path = json.load(open(self.editor_container.project_path + "/data.json", "r"))["current_scene"]        
+            
+            if save_scene_path:
+                self.editor_container.save_scene(save_scene_path)
     
     def update(self):
         self.add_project_button = Button(10, 10, 150, 50, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Add Project", (0, 0, 0, 255), b"assets/Arimo-VariableFont_wght.ttf", 20)
@@ -496,11 +502,11 @@ class TitanMainMenu:
             raylib.ClearBackground(raylib.RAYWHITE)
 
             try:
-                project_list_file = open("projects.json", "r")
+                project_list_file = open(self.local_data_path + "/projects.json", "r")
             except:
                 print("ERROR: Global project list file does not exist in directory ... creating project list file.")
 
-                project_list_file = open("projects.json", "x")
+                project_list_file = open(self.local_data_path + "/projects.json", "x")
                 project_list_file.write("[]")
                 project_list_file.close()
 
@@ -513,7 +519,7 @@ class TitanMainMenu:
                 print(error_message)
                 print("Clearing global project list ...")
 
-                project_list_file = open("projects.json", "w")
+                project_list_file = open(self.local_data_path + "/projects.json", "w")
                 project_list_file.write("[]")
                 project_list_file.close()
 
@@ -529,12 +535,15 @@ class TitanMainMenu:
 
                     project_list_file.close()
 
-                    project_list_file_w = open("projects.json", "w")
+                    project_list_file_w = open(self.local_data_path + "/projects.json", "w")
                     project_list_file_w.write(str(projects).replace("'", '"'))
                     project_list_file_w.close()
 
-                    project_data_file = open(project_path + "/data.json", "x")
-                    project_data_file.write("{\"project_name\": \"New Titan Project\", \"current_scene\": \"\"}")
+                    try:
+                        project_data_file = open(project_path + "/data.json", "x")
+                        project_data_file.write("{\"project_name\": \"New Titan Project\", \"current_scene\": \"\"}")
+                    except:
+                        print("WARNING: Project exists. Proceding.")
 
             for i in range(len(projects)):
                 raylib.DrawTextEx(ARIAL_FONT, bytes(projects[i], 'utf-8'), (10, 200 + i * 100), 30, 3, (0, 0, 0, 255))

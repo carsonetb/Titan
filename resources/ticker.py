@@ -4,8 +4,10 @@ import resources.button
 from resources import global_enumerations
 
 
-FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
-
+if os.path.exists("assets/Arimo-VariableFont_wght.ttf"):
+    FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
+else:
+    FONT = raylib.LoadFont(os.path.join(os.path.dirname(__file__), "Arimo-VariableFont_wght.ttf").encode("utf-8"))
 
 class Ticker:
     def __init__(self, x, y, width, height, border_radius, font_size, init_value, increment_value = 1):

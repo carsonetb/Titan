@@ -1,9 +1,13 @@
 import raylib
 import resources.timer
+import os
 from resources import global_enumerations
 
 
-FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
+if os.path.exists("assets/Arimo-VariableFont_wght.ttf"):
+    FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
+else:
+    FONT = raylib.LoadFont(os.path.join(os.path.dirname(__file__), "Arimo-VariableFont_wght.ttf").encode("utf-8"))
 
 
 class Button:
