@@ -73,7 +73,7 @@ def running_game_process(project_path):
     # Initialise raylib.
     raylib.SetConfigFlags(raylib.FLAG_WINDOW_RESIZABLE)
     raylib.SetConfigFlags(raylib.FLAG_MSAA_4X_HINT)
-    raylib.InitWindow(1170, 950, project_data["name"].encode("ascii"))
+    raylib.InitWindow(1170, 950, (project_data["name"] + " (DEBUG)").encode("ascii"))
     raylib.SetExitKey(0)
 
     # Initialize default scene.

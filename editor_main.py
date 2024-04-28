@@ -365,12 +365,18 @@ class EditorHandler:
         # Start the game in another thread if the play button is pressed.
         if play_button_pressed == global_enumerations.BUTTON_JUST_PRESSED:
             # Save scene before starting.
+            print("INFO: Saving scene before running game.")
             project_data_file = open(self.project_path + "/data.json", "r")
             self.project_data = json.load(project_data_file)
             self.save_scene(self.project_data["current_scene"])
 
+            print("INFO: Starting game running subprocess.")
             self.running_game_process = multiprocessing.Process(target=run_game.running_game_process, args=(self.project_path,))
             self.running_game_process.start()
+
+        if stop_button_pressed == global_enumerations.BUTTON_JUST_PRESSED and self.running_game_process:
+            print("INFO: Stopping game running subprocess.")
+            self.running_game_process.terminate()
 
     def update(self):
         raylib.BeginDrawing()
