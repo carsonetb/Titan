@@ -1,8 +1,5 @@
 import pygame
 import raylib
-import importlib
-import sys
-from pygame import gfxdraw
 import tkinter
 import tkinter.filedialog
 import tkinter.simpledialog
@@ -382,10 +379,11 @@ class EditorHandler:
 
         raylib.EndDrawing()
 
-    def load_scene(self, filename):
+    def load_scene(self, filename, save_scene=True):
         # Save scene before loading another one.
-        save_scene_path = json.load(open(self.project_path + "/data.json", "r"))["current_scene"]        
-        self.save_scene(save_scene_path)
+        if save_scene:
+            save_scene_path = json.load(open(self.project_path + "/data.json", "r"))["current_scene"]        
+            self.save_scene(save_scene_path)
 
         # Load scene file.
         scene_file = open(filename, "r")
@@ -506,7 +504,7 @@ class TitanMainMenu:
                         project_data = json.load(project_file)
 
                         if project_data["current_scene"] != "":
-                            self.editor_container.load_scene(project_data["current_scene"])
+                            self.editor_container.load_scene(project_data["current_scene"], save_scene=False)
 
                     return
                 

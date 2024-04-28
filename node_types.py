@@ -2,11 +2,8 @@ import pygame
 import raylib
 import importlib
 import sys
-from pygame import gfxdraw
-import random
 import tripy
 import numpy
-import copy
 
 import resources.misc
 from resources import global_enumerations
