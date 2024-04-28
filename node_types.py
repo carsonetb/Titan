@@ -117,6 +117,7 @@ class Position:
             child.game_update()
         
         self.previous_position = self.position
+        self.previous_scale = self.scale
     
     def add_position(self, added_position):
         self.position += added_position
@@ -414,7 +415,7 @@ class Shape(Position):
             raylib.DrawRectangle(int(self.position.x - self.width / 2), int(self.position.y - self.height / 2), int(self.width), int(self.height), self.color)
         
         if self.shape_index == global_enumerations.SHAPE_CIRCLE:
-            raylib.DrawCircle(self.x, self.y, self.radius, self.color)
+            raylib.DrawCircle(int(self.position.x), int(self.position.y), self.radius, self.color)
 
         if self.shape_index == global_enumerations.SHAPE_LINE:
             raylib.DrawLineStrip(self.points, len(self.points), self.color)
