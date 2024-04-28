@@ -211,7 +211,7 @@ class Sprite(Position):
         super().game_update()
 
         if self.sprite_path:
-            raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(self.position.x - self.image_width / 2), int(self.position.y - self.image_height / 2), self.image_width * self.scale.x, self.image_height * self.scale.y], [0, 0], self.rotation_degrees, raylib.WHITE)
+            raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(self.position.x - (self.image_width * self.scale.x) / 2), int(self.position.y - (self.image_height * self.scale.y) / 2), self.image_width * self.scale.x, self.image_height * self.scale.y], [0, 0], self.rotation_degrees, raylib.WHITE)
 
     def set_texture(self, path):
         self.sprite_path = path
