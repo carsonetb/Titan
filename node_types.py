@@ -4,11 +4,13 @@ import importlib
 import sys
 import tripy
 import numpy
+import copy
 
 import resources.misc
 from resources import global_enumerations
 from resources.button import Button
 from resources.button import InvisibleButton
+from resources.script_connection_layer import EngineInteractable
 
 class Position:
     def __init__(self):
@@ -87,20 +89,26 @@ class Position:
         else:
             self.just_moved = False
 
-        self.previous_position = self.position
+        self.previous_position = copy.copy(self.position)
         self.previous_scale = self.scale
     
     def game_update(self):
         if self.has_script:
             if self.script_has_update == "Untested":
                 try: 
-                    self.script.update()
-                    self.script_has_update = True
-                    self.script.ready()
-                except:
+                    self.script.update(raylib.GetFrameTime(), EngineInteractable())
+                    self.script_has_update = True 
+                    try:
+                        self.script.ready()
+                    except:
+                        pass
+
+                except Exception as e:
+                    print(f"WARNING: Failed to run update function on script at {self.script_path}. Exception with error {e}")
                     self.script_has_update = False
+
             elif self.script_has_update:
-                self.script.update()
+                self.script.update(raylib.GetFrameTime(), EngineInteractable())
             
             if self.script_has_position == "Untested":
                 try: 
@@ -116,7 +124,7 @@ class Position:
             child.add_scale(self.scale - self.previous_scale)
             child.game_update()
         
-        self.previous_position = self.position
+        self.previous_position = copy.copy(self.position)
         self.previous_scale = self.scale
     
     def add_position(self, added_position):
@@ -174,6 +182,9 @@ class Position:
         self.rotation_degrees = resources.misc.rad_to_deg(self.rotation)
         
         self.name = node["name"]
+
+        if self.script_path:
+            self.load_script(self.script_path)
 
         for child in node["children"]:
             if child["type"] == "Position":

@@ -44,6 +44,7 @@ REG_FONT = pygame.font.SysFont("arial", 11)
 TITLE_FONT = pygame.font.SysFont("arial", 40)
 SUBTITLE_FONT = pygame.font.SysFont("arial", 30)
 
+
 class AddNodeDialogue:
     def __init__(self, x, y, width, height):
         self.width = width
@@ -304,12 +305,25 @@ class EditorHandler:
         # Rotation label.
         raylib.DrawTextEx(ARIAL_FONT, "Rotation".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 340 + position_addon.y), 30, 3, raylib.BLACK)
 
+        # Attach script button.
+        attach_script_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10, 400, 200, 30, 1, 0, raylib.BLACK, raylib.WHITE, b"Attach Script" if not self.selected_node.script else b"Detach Script", raylib.BLACK, "", 30)
+
         # Update tickers.
         mod_position_x_ticker.update()
         mod_position_y_ticker.update()
         mod_scale_x_ticker.update()
         mod_scale_y_ticker.update()
         mod_rotation_ticker.update()
+
+        # Update buttons.
+        attach_script_button_pressed = attach_script_button.update()
+
+        if attach_script_button_pressed == global_enumerations.BUTTON_JUST_PRESSED:
+            script_file_path = tkinter.filedialog.askopenfilename()
+
+            # Attach a script to the node if the path is valid.
+            if resources.misc.is_filename_valid(script_file_path):
+                self.selected_node.load_script(script_file_path)
 
         # Modify values changed by tickers.
         self.selected_node.add_position(pygame.Vector2(mod_position_x_ticker.value - self.selected_node.position.x, mod_position_y_ticker.value - self.selected_node.position.y))
