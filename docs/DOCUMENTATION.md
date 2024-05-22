@@ -13,4 +13,16 @@ the game.
 Base node for storing position in the engine. All nodes
 inherit from Position.
 
-Maybe finish this at some point...
+### Sprite
+
+Inherits: Position
+
+Base node for displaying an image/sprite. Can be scaled
+and rotated.
+
+### Shape
+
+Inherits: Position
+
+Displays a shape like a rectangle, circle, line, or 
+polygon. 
