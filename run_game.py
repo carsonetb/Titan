@@ -6,6 +6,7 @@ import tkinter.simpledialog
 import json
 import copy
 import multiprocessing
+import pymunk
 
 # Initialise pygame.
 pygame.init()
@@ -75,6 +76,9 @@ def running_game_process(project_path):
     raylib.SetConfigFlags(raylib.FLAG_MSAA_4X_HINT)
     raylib.InitWindow(1170, 950, (project_data["name"] + " (DEBUG)").encode("ascii"))
     raylib.SetExitKey(0)
+
+    # Create physics space.
+    physics_space = pymunk.Space(True)
 
     # Initialize default scene.
     top_level_nodes = load_scene(project_data["current_scene"], project_path)

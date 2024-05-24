@@ -35,7 +35,7 @@ if __name__ == "__main__":
     elif sys.platform.startswith("darwin"):
         print("INFO: Detected platform MacOS.")
 
-        # This might not work on Linux. Currently untested.
+        # This might not work on MacOS. Currently untested.
         appdata_path = "~/.local/share"
 
     else:

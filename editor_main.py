@@ -21,6 +21,7 @@ raylib.SetExitKey(0)
 from node_types import Position
 from node_types import Sprite
 from node_types import Shape
+from node_types import PhysicsShape
 
 # Load editor resources.
 from resources.button import Button
@@ -54,6 +55,7 @@ class AddNodeDialogue:
         self.position_button = Button(self.x + 10, self.y + 10, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Position", (0, 0, 0, 255), "arial", 20)
         self.sprite_button = Button(self.x + 10, self.y + 40, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Sprite", (0, 0, 0, 255), "arial", 20)
         self.shape_button = Button(self.x + 10, self.y + 70, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Shape", (0, 0, 0, 255), "arial", 20) 
+        self.physics_shape_button = Button(self.x + 10, self.y + 100, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Physics Shape", (0, 0, 0, 255), "arial", 20) 
 
     def update(self):
         raylib.DrawRectangle(self.x, self.y, self.width, self.height, (170, 170, 170, 255))
@@ -65,6 +67,7 @@ class AddNodeDialogue:
         if self.position_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_POSITION
         if self.sprite_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_SPRITE
         if self.shape_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_SHAPE
+        if self.physics_shape_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_PHYSICS_SHAPE
 
         if raylib.IsKeyDown(raylib.KEY_ESCAPE):
             return global_enumerations.EXIT
@@ -277,7 +280,25 @@ class EditorHandler:
         if updated_shape_type:
             self.selected_node.shape_index = self.shape_type_enum.enum.enum[self.shape_type_enum.enum.item_selected]
 
-        self._draw_position_specific_options(pygame.Vector2(0, dynamic_position_addon_y))
+        self._draw_position_specific_options(pygame.Vector2(position_addon.x, dynamic_position_addon_y + position_addon.y))
+
+    def _draw_physics_shape_specific_options(self, position_addon: pygame.Vector2):
+        # Shape label.
+        raylib.DrawTextEx(ARIAL_FONT, "Inherits: Physics Shape".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 28, 3, raylib.BLACK)
+
+        # Velocity tickers.
+        mod_velocity_x_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20, self.selected_node.velocity.x)
+        mod_velocity_y_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 0, 20, self.selected_node.velocity.y)
+
+        # Update tickers.
+        mod_velocity_x_ticker.update()
+        mod_velocity_y_ticker.update()
+
+        # Set velocity values.
+        self.selected_node.velocity.x = mod_velocity_x_ticker.value
+        self.selected_node.velocity.y = mod_velocity_y_ticker.value
+
+        self._draw_shape_specific_options(pygame.Vector2(position_addon.x, 120 + position_addon.y))
 
     def _draw_position_specific_options(self, position_addon: pygame.Vector2):
         # Position label.
@@ -306,7 +327,7 @@ class EditorHandler:
         raylib.DrawTextEx(ARIAL_FONT, "Rotation".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 340 + position_addon.y), 30, 3, raylib.BLACK)
 
         # Attach script button.
-        attach_script_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10, 400, 200, 30, 1, 0, raylib.BLACK, raylib.WHITE, b"Attach Script" if not self.selected_node.script else b"Detach Script", raylib.BLACK, "", 30)
+        attach_script_button = Button(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 400 + position_addon.y, 200, 30, 1, 0, raylib.BLACK, raylib.WHITE, b"Attach Script" if not self.selected_node.script else b"Detach Script", raylib.BLACK, "", 30)
 
         # Update tickers.
         mod_position_x_ticker.update()
@@ -319,11 +340,15 @@ class EditorHandler:
         attach_script_button_pressed = attach_script_button.update()
 
         if attach_script_button_pressed == global_enumerations.BUTTON_JUST_PRESSED:
-            script_file_path = tkinter.filedialog.askopenfilename()
+            if self.selected_node.script:
+                self.selected_node.script = None
+                self.selected_node.script_path = ""
+            else:
+                script_file_path = tkinter.filedialog.askopenfilename()
 
-            # Attach a script to the node if the path is valid.
-            if resources.misc.is_filename_valid(script_file_path):
-                self.selected_node.load_script(script_file_path)
+                # Attach a script to the node if the path is valid.
+                if resources.misc.is_filename_valid(script_file_path):
+                    self.selected_node.load_script(script_file_path)
 
         # Modify values changed by tickers.
         self.selected_node.add_position(pygame.Vector2(mod_position_x_ticker.value - self.selected_node.position.x, mod_position_y_ticker.value - self.selected_node.position.y))
@@ -337,6 +362,7 @@ class EditorHandler:
             if self.node_to_add == global_enumerations.NODE_POSITION: child = Position()
             if self.node_to_add == global_enumerations.NODE_SPRITE: child = Sprite()
             if self.node_to_add == global_enumerations.NODE_SHAPE: child = Shape()
+            if self.node_to_add == global_enumerations.NODE_PHYSICS_SHAPE: child = PhysicsShape()
             if self.node_to_add == global_enumerations.EXIT:
                 self.adding_node = False
                 self.adding_child = False
@@ -431,6 +457,8 @@ class EditorHandler:
                 self._draw_sprite_specific_options(pygame.Vector2(0, 0))
             if self.selected_node.node_type == "Shape":
                 self._draw_shape_specific_options(pygame.Vector2(0, 0))
+            if self.selected_node.node_type == "PhysicsShape":
+                self._draw_physics_shape_specific_options(pygame.Vector2(0, 0))
 
         # Handle adding new node if we're doing that.
         if self.adding_node:
@@ -477,6 +505,8 @@ class EditorHandler:
                 node_to_add = Sprite()
             elif node["type"] == "Shape":
                 node_to_add = Shape()
+            elif node["type"] == "PhysicsShape":
+                node_to_add = PhysicsShape()
 
             # Nodes loads itself ... will add it's children.
             node_to_add.load_self(node)
