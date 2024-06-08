@@ -30,13 +30,13 @@ if __name__ == "__main__":
         print("INFO: Detected platform Linux.")
 
         # This might not work on Linux. Currently untested.
-        appdata_path = "~/.local/share"
+        appdata_path = f"{os.getenv('HOME')}/.local/share"
 
     elif sys.platform.startswith("darwin"):
         print("INFO: Detected platform MacOS.")
 
         # This might not work on MacOS. Currently untested.
-        appdata_path = "~/.local/share"
+        appdata_path = f"{os.getenv('HOME')}/.local/share"
 
     else:
         print(f"WARNING: Detected unfamiliar platform: '{sys.platform}'. Assuming Linux-like distribution.")

@@ -3,6 +3,7 @@ import raylib
 import tkinter
 import tkinter.filedialog
 import tkinter.simpledialog
+import tkinter.messagebox
 import json
 import copy
 import multiprocessing
@@ -147,7 +148,7 @@ class EditorHandler:
                 self.selected_node.name = new_name
 
         if save_scene_button_clicked:
-            scene_save_path = tkinter.filedialog.askopenfilename()
+            scene_save_path = tkinter.filedialog.asksaveasfilename()
             
             if scene_save_path:
                 self.save_scene(scene_save_path)
@@ -493,7 +494,13 @@ class EditorHandler:
             self.save_scene(save_scene_path)
 
         # Load scene file.
-        scene_file = open(filename, "r")
+        try: 
+            scene_file = open(filename, "r")
+        except Exception as e:
+            tkinter.messagebox.showerror("Scene load error!", f"Scene load filepath is invalid. Filepath is {filename}. Exit with error {e}")
+
+            return global_enumerations.EXIT_ERRORS_FATAL
+
         data = json.load(scene_file)
 
         # Clear nodes.
@@ -531,7 +538,12 @@ class EditorHandler:
 
     # Save scene at path.
     def save_scene(self, scene_save_path):
-        scene_save_file = open(scene_save_path, "w+")
+        try:
+            scene_save_file = open(scene_save_path, "w+")
+        except Exception as e:
+            tkinter.messagebox.showerror("Invalid save filename!", f"Scene save filepath is invalid. Filepath is {scene_save_path}. Exit with error {e}")
+            return
+            
         scene_save_file.write(str([self.top_level_nodes[i].get_properties_dict() for i in range(len(self.top_level_nodes))]).replace("'", '"'))
         scene_save_file.close()
 
@@ -620,7 +632,18 @@ class TitanMainMenu:
                         project_data = json.load(project_file)
 
                         if project_data["current_scene"] != "":
-                            self.editor_container.load_scene(project_data["current_scene"], save_scene=False)
+                            load_scene_exit_status = self.editor_container.load_scene(project_data["current_scene"], save_scene=False)
+
+                            if load_scene_exit_status == global_enumerations.EXIT_ERRORS_FATAL:
+                                # Open data file to attempt to fix default filepath.
+                                project_global_data_file = open(projects[i] + "/data.json", "r")
+                                project_global_data = json.load(project_global_data_file)
+                                project_global_data["current_scene"] = ""
+                                project_global_data_file.close()
+
+                                # Write to data file.
+                                project_global_data_file = open(projects[i] + "/data.json", "w")
+                                project_global_data_file.write(str(project_global_data).replace("'", '"'))
 
                     return
                 
