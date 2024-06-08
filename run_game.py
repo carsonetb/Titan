@@ -15,6 +15,8 @@ pygame.init()
 from node_types import Position
 from node_types import Sprite
 from node_types import Shape
+from node_types import PhysicsShape
+from node_types import RigidBody
 
 # Run game dependencies.
 from resources import global_enumerations
@@ -46,6 +48,10 @@ def load_scene(filename, project_path):
             node_to_add = Sprite()
         elif node["type"] == "Shape":
             node_to_add = Shape()
+        elif node["type"] == "PhysicsShape":
+            node_to_add = PhysicsShape()
+        elif node["type"] == "RigidBody":
+            node_to_add = RigidBody()
 
         # Nodes loads itself ... will add it's children.
         node_to_add.load_self(node)

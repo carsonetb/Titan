@@ -1,1 +1,0 @@
-[{"type": "Position", "name": "Unnamed", "script_path": "", "children": [{"type": "Sprite", "name": "Unnamed", "script_path": "", "children": [], "position_x": 1089.0, "position_y": 572.0, "scale_x": 1.0, "scale_y": 1.0, "sprite_path": "C:/Users/black/Titan/new_project/assets/logo.png"}], "position_x": 0.0, "position_y": 0.0, "scale_x": 1.0, "scale_y": 1.0}]

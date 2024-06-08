@@ -22,6 +22,7 @@ from node_types import Position
 from node_types import Sprite
 from node_types import Shape
 from node_types import PhysicsShape
+from node_types import RigidBody
 
 # Load editor resources.
 from resources.button import Button
@@ -56,6 +57,7 @@ class AddNodeDialogue:
         self.sprite_button = Button(self.x + 10, self.y + 40, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Sprite", (0, 0, 0, 255), "arial", 20)
         self.shape_button = Button(self.x + 10, self.y + 70, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Shape", (0, 0, 0, 255), "arial", 20) 
         self.physics_shape_button = Button(self.x + 10, self.y + 100, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Physics Shape", (0, 0, 0, 255), "arial", 20) 
+        self.rigid_body_button = Button(self.x + 10, self.y + 130, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Rigid Body", (0, 0, 0, 255), "arial", 20) 
 
     def update(self):
         raylib.DrawRectangle(self.x, self.y, self.width, self.height, (170, 170, 170, 255))
@@ -68,6 +70,7 @@ class AddNodeDialogue:
         if self.sprite_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_SPRITE
         if self.shape_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_SHAPE
         if self.physics_shape_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_PHYSICS_SHAPE
+        if self.rigid_body_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_RIGID_BODY
 
         if raylib.IsKeyDown(raylib.KEY_ESCAPE):
             return global_enumerations.EXIT
@@ -165,7 +168,7 @@ class EditorHandler:
         if load_scene_button_clicked:
             file_path = tkinter.filedialog.askopenfilename()
             if resources.misc.is_filename_valid(file_path):
-                self.load_scene(file_path)
+                self.load_scene(file_path, False)
             else:
                 print("Warning: Invalid sprite path.")
 
@@ -276,6 +279,8 @@ class EditorHandler:
 
         self.shape_type_enum.position.x = raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x
 
+        # CURRENTLY WORKING ON NODE DIALOGUE FOR RIGIDBODY!!!
+
         updated_shape_type = self.shape_type_enum.update()
         if updated_shape_type:
             self.selected_node.shape_index = self.shape_type_enum.enum.enum[self.shape_type_enum.enum.item_selected]
@@ -299,6 +304,13 @@ class EditorHandler:
         self.selected_node.velocity.y = mod_velocity_y_ticker.value
 
         self._draw_shape_specific_options(pygame.Vector2(position_addon.x, 120 + position_addon.y))
+
+    def _draw_rigd_body_specific_options(self, position_addon: pygame.Vector2):
+        # Type label.
+        raylib.DrawTextEx(ARIAL_FONT, "Inherits: Rigid Body".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
+
+        # Mass ticker.
+        mod_velocity_x_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20, self.selected_node.velocity.x)
 
     def _draw_position_specific_options(self, position_addon: pygame.Vector2):
         # Position label.
@@ -363,6 +375,7 @@ class EditorHandler:
             if self.node_to_add == global_enumerations.NODE_SPRITE: child = Sprite()
             if self.node_to_add == global_enumerations.NODE_SHAPE: child = Shape()
             if self.node_to_add == global_enumerations.NODE_PHYSICS_SHAPE: child = PhysicsShape()
+            if self.node_to_add == global_enumerations.NODE_RIGID_BODY: child = RigidBody()
             if self.node_to_add == global_enumerations.EXIT:
                 self.adding_node = False
                 self.adding_child = False

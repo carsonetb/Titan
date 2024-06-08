@@ -2,7 +2,7 @@ import pygame
 import raylib
 
 NODE_TYPE = "Position"
-position = pygame.Vector2(0, 0)
+position = pygame.Vector2(100, 0)
 
 
 def update(delta, engine_interactable):

@@ -5,6 +5,8 @@ import sys
 import tripy
 import numpy
 import copy
+import pymunk
+import math
 
 import resources.misc
 from resources import global_enumerations
@@ -18,6 +20,7 @@ class Position:
         self.script = None
         self.node_type = "Position"
         self.position = pygame.Vector2(0, 0)
+        self.global_position = pygame.Vector2(0, 0)
         self.previous_position = pygame.Vector2(0, 0)
         self.scale = pygame.Vector2(1, 1)
         self.previous_scale = pygame.Vector2(1, 1)
@@ -54,7 +57,7 @@ class Position:
             print(f"Error Loading Script: NODE_TYPE variable does not exist. It should be '{self.node_type}'")
     
     def editor_update(self, origin_offset):
-        offset_position = origin_offset + self.position
+        offset_position = origin_offset + self.global_position
         raylib.DrawCircleLines(int(offset_position.x), int(offset_position.y), 15, (0, 0, 0, 255))
         
         if self.selected:
@@ -77,10 +80,9 @@ class Position:
             self.eligable_for_dragging = False
         
         if self.mouse_dragging:
-            self.position = mouse_pos - origin_offset
+            self.position = mouse_pos - origin_offset - (pygame.Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
 
         for child in self.children:
-            child.add_position(self.position - self.previous_position)
             child.add_scale(self.scale - self.previous_scale)
             child.editor_update(origin_offset)
 
@@ -89,8 +91,9 @@ class Position:
         else:
             self.just_moved = False
 
+        self.global_position = self.get_global_position()
         self.previous_position = copy.copy(self.position)
-        self.previous_scale = self.scale
+        self.previous_scale = copy.copy(self.scale)
     
     def game_update(self):
         if self.has_script:
@@ -120,18 +123,15 @@ class Position:
                 self.position = self.script.position
         
         for child in self.children:
-            child.add_position(self.position - self.previous_position)
             child.add_scale(self.scale - self.previous_scale)
             child.game_update()
         
+        self.global_position = self.get_global_position()
         self.previous_position = copy.copy(self.position)
         self.previous_scale = self.scale
     
     def add_position(self, added_position):
         self.position += added_position
-
-        for child in self.children:
-            child.add_position(added_position)
 
     def add_scale(self, added_scale: pygame.Vector2):
         if added_scale == pygame.Vector2(0, 0):
@@ -174,6 +174,12 @@ class Position:
             "scale_y": self.scale.y,
         }
     
+    def get_global_position(self):
+        if not self.parent == "Root":
+            return self.parent.get_global_position() + self.position
+
+        return self.position
+
     def load_self(self, node):
         self.script_path = node["script_path"]
         self.position = pygame.Vector2(node["position_x"], node["position_y"])
@@ -182,6 +188,7 @@ class Position:
         self.rotation_degrees = resources.misc.rad_to_deg(self.rotation)
         
         self.name = node["name"]
+        print(f"Loaded Position {self.position} name {self.name}")
 
         if self.script_path:
             self.load_script(self.script_path)
@@ -197,6 +204,7 @@ class Position:
             node_to_add.load_self(child)
             node_to_add.previous_position = node_to_add.position
             node_to_add.previous_scale = node_to_add.scale
+            node_to_add.parent = self
             self.children.append(node_to_add)
 
 
@@ -211,18 +219,18 @@ class Sprite(Position):
         self.image_height = None
 
     def editor_update(self, origin_offset):
-        offset_position = self.position + origin_offset
+        super().editor_update(origin_offset)
+
+        offset_position = self.global_position + origin_offset
 
         if self.sprite_path:
             raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(offset_position.x - (self.image_width * self.scale.x) / 2), int(offset_position.y - (self.image_height * self.scale.y) / 2), self.image_width * self.scale.x, self.image_height * self.scale.y], [0, 0], self.rotation_degrees, raylib.WHITE)
-
-        super().editor_update(origin_offset)
 
     def game_update(self):
         super().game_update()
 
         if self.sprite_path:
-            raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(self.position.x - (self.image_width * self.scale.x) / 2), int(self.position.y - (self.image_height * self.scale.y) / 2), self.image_width * self.scale.x, self.image_height * self.scale.y], [0, 0], self.rotation_degrees, raylib.WHITE)
+            raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(self.global_position.x - (self.image_width * self.scale.x) / 2), int(self.global_position.y - (self.image_height * self.scale.y) / 2), self.image_width * self.scale.x, self.image_height * self.scale.y], [0, 0], self.rotation_degrees, raylib.WHITE)
 
     def set_texture(self, path):
         self.sprite_path = path
@@ -282,7 +290,7 @@ class Shape(Position):
         self.color = (0, 0, 0, 255)
 
     def editor_update(self, origin_offset):
-        offset_position = self.position + origin_offset
+        offset_position = self.global_position + origin_offset
 
         if self.just_moved:
             for point_index in range(len(self.points)):
@@ -423,10 +431,10 @@ class Shape(Position):
         super().game_update()
 
         if self.shape_index == global_enumerations.SHAPE_RECT:
-            raylib.DrawRectangle(int(self.position.x - self.width / 2), int(self.position.y - self.height / 2), int(self.width), int(self.height), self.color)
+            raylib.DrawRectangle(int(self.global_position.x - self.width / 2), int(self.global_position.y - self.height / 2), int(self.width), int(self.height), self.color)
         
         if self.shape_index == global_enumerations.SHAPE_CIRCLE:
-            raylib.DrawCircle(int(self.position.x), int(self.position.y), self.radius, self.color)
+            raylib.DrawCircle(int(self.global_position.x), int(self.global_position.y), self.radius, self.color)
 
         if self.shape_index == global_enumerations.SHAPE_LINE:
             raylib.DrawLineStrip(self.points, len(self.points), self.color)
@@ -509,7 +517,7 @@ class PhysicsShape(Shape):
         super().editor_update(origin_offset)
     
     def game_update(self):
-        Position.editor_update(self, pygame.Vector2(0, 0))
+        Position.game_update(self)
 
     def get_properties_dict(self):
         shape_properties_dict = super().get_properties_dict()
@@ -523,3 +531,67 @@ class PhysicsShape(Shape):
         super().load_self(node)
 
         self.velocity = pygame.Vector2(int(node["vel_x"]), int(node["vel_y"]))
+
+
+class RigidBody(PhysicsShape):
+    def __init__(self):
+        PhysicsShape.__init__(self)
+
+        self.mass = 10
+
+        self.body = pymunk.Body()
+        self.body.position = self.global_position
+
+        self.shape = pymunk.Poly(self.body, [
+            (self.global_position.x - self.width / 2, self.global_position.y - self.height / 2),
+            (self.global_position.x + self.width / 2, self.global_position.y - self.height / 2),
+            (self.global_position.x - self.width / 2, self.global_position.y + self.height / 2),
+            (self.global_position.x + self.width / 2, self.global_position.y + self.height / 2)
+        ])
+        self.shape.mass = self.mass
+
+        self.added_to_simulation = False
+
+    def editor_update(self, origin_offset):
+        super().editor_update(origin_offset)
+
+        if self.shape_index == global_enumerations.SHAPE_RECT:
+            self.shape = pymunk.Poly(self.body, [
+                (self.global_position.x - self.width / 2, self.global_position.y - self.height / 2),
+                (self.global_position.x + self.width / 2, self.global_position.y - self.height / 2),
+                (self.global_position.x - self.width / 2, self.global_position.y + self.height / 2),
+                (self.global_position.x + self.width / 2, self.global_position.y + self.height / 2)
+            ])
+            self.shape.mass = self.mass
+
+        if self.shape_index == global_enumerations.SHAPE_CIRCLE:
+            self.shape = pymunk.Circle(self.body, self.radius)
+            self.shape.mass = self.mass
+
+        if self.shape_index == global_enumerations.SHAPE_POLYGON:
+            self.shape = pymunk.Poly(self.body, self.points)
+            self.shape.mass = self.mass
+
+        self.body.position = self.position
+        self.body.rotation_vector = (math.cos(self.rotation), math.sin(self.rotation))
+
+    def game_update(self, pymunk_space: pymunk.Space):
+        PhysicsShape.game_update()
+
+        if not self.added_to_simulation:
+            pymunk_space.add(self.body)
+
+        self.position = self.body.position - (pygame.Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
+        self.rotation = math.atan2(self.body.rotation_vector.y, self.body.rotation_vector.x)
+
+    def get_properties_dict(self):
+        shape_properties_dict = super().get_properties_dict()
+        shape_properties_dict["type"] = "RigidBody"
+        shape_properties_dict["mass"] = self.mass
+
+        return shape_properties_dict
+    
+    def load_self(self, node):
+        super().load_self(node)
+
+        self.mass = int(node["mass"])
