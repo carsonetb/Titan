@@ -82,9 +82,11 @@ def running_game_process(project_path):
     raylib.SetConfigFlags(raylib.FLAG_MSAA_4X_HINT)
     raylib.InitWindow(1170, 950, (project_data["name"] + " (DEBUG)").encode("ascii"))
     raylib.SetExitKey(0)
+    raylib.SetTargetFPS(60)
 
     # Create physics space.
     physics_space = pymunk.Space(True)
+    physics_space.gravity = (0, -9.81)
 
     # Initialize default scene.
     top_level_nodes = load_scene(project_data["current_scene"], project_path)
@@ -96,7 +98,13 @@ def running_game_process(project_path):
         
         # IMPORTANT: Update all nodes!
         for node in top_level_nodes:
-            node.game_update()
+            if node.node_type == "RigidBody":
+                node.game_update(physics_space)
+            else:
+                node.game_update()
+        
+        # Step physics simulation.
+        physics_space.step(1/60)
             
         # Draw debug FPS in the top left corner.
         raylib.DrawFPS(10, 10)

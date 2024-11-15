@@ -527,6 +527,8 @@ class EditorHandler:
                 node_to_add = Shape()
             elif node["type"] == "PhysicsShape":
                 node_to_add = PhysicsShape()
+            elif node["type"] == "RigidBody":
+                node_to_add = RigidBody()
 
             # Nodes loads itself ... will add it's children.
             node_to_add.load_self(node)
