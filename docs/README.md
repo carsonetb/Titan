@@ -6,7 +6,7 @@ The Titan Game Engine is a 2D game engine aimed at
 creating linear, level-based games. It is created
 by Carson Bates for Epimetheus games. 
 
-This project is estimated to be 4% finished.
+This project is estimated to be 6% finished.
 
 ## Links
 
@@ -18,11 +18,13 @@ This project is estimated to be 4% finished.
 - Position: Base node for all other nodes, stores position, scale, and rotation.
 - Sprite: Displays an image from a file.
 - Shape: Node for displaying shapes like polygons, lines, circles, and rectangles.
+- PhysicsShape: Inherits Shape and helps handle velocity of physics objects.
+- RigidBody: Inherits PhysicsShape and has rigid collisions.
 
 ## Scripting
 
 The scripting is done in pure Python. This comes
-with the perk of being to use any Python module
+with the perk of being able to use any Python module
 (whether it comes with Python or has been 
 installed with PyPi or another third party Python
 package installation tool) in a script. A single
