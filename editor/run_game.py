@@ -12,11 +12,11 @@ import pymunk
 pygame.init()
 
 # Load node types
-from node_types import Position
-from node_types import Sprite
-from node_types import Shape
-from node_types import PhysicsShape
-from node_types import RigidBody
+from node_types.node_types import Position
+from node_types.node_types import Sprite
+from node_types.node_types import Shape
+from node_types.node_types import PhysicsShape
+from node_types.node_types import RigidBody
 
 # Run game dependencies.
 from resources import global_enumerations

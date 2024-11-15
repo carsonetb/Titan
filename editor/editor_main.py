@@ -19,11 +19,11 @@ raylib.InitWindow(1800, 1000, b"Titan Game Engine")
 raylib.SetExitKey(0)
 
 # Load node types
-from node_types import Position
-from node_types import Sprite
-from node_types import Shape
-from node_types import PhysicsShape
-from node_types import RigidBody
+from node_types.position import Position
+from node_types.sprite import Sprite
+from node_types.shape import Shape
+from node_types.physics_shape import PhysicsShape
+from node_types.rigid_body import RigidBody
 
 # Load editor resources.
 from resources.button import Button

@@ -19,4 +19,4 @@ print("Finished installing dependencies. Building to executable.")
 print("Waiting 3 seconds to start.")
 time.sleep(3)
 
-os.system("pyinstaller main.py --distpath . -F -n TitanGameEngine --add-data projects.json:. --add-data assets:.")
+os.system("pyinstaller editor/main.py --distpath . -F -n TitanGameEngine --add-data projects.json:. --add-data assets:.")
