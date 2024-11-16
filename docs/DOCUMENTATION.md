@@ -1,7 +1,8 @@
 # Titan Game Engine Documentation
 
 A comprehensive documentation of nodes and scripting in the
-Titan game engine.
+Titan game engine. Some of this might look wierd if you look
+at it in the Github markdown viewer. Look at the raw instead.
 
 ## Scripting
 
