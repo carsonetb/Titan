@@ -1,5 +1,7 @@
 import pygame
+import pymunk
 
+from resources import global_enumerations
 from node_types.shape import Shape
 
 class PhysicsShape(Shape):
@@ -18,11 +20,27 @@ class PhysicsShape(Shape):
         self.velocity = pygame.Vector2(0, 0)
 
     def editor_update(self, origin_offset):
-        origin_offset += self.velocity
         super().editor_update(origin_offset)
     
     def game_update(self):
         Shape.game_update(self)
+    
+    def generate_shape(self):
+        if self.shape_index == global_enumerations.SHAPE_RECT:
+            shape = pymunk.Poly(self.body, [
+                (-self.width / 2, self.height / 2),
+                (self.width / 2, self.height / 2),
+                (-self.width / 2, -self.height / 2),
+                (self.width / 2, -self.height / 2)
+            ])
+
+        if self.shape_index == global_enumerations.SHAPE_CIRCLE:
+            shape = pymunk.Circle(self.body, self.radius)
+
+        if self.shape_index == global_enumerations.SHAPE_POLYGON:
+            shape = pymunk.Poly(self.body, self.points)
+        
+        return shape
 
     def get_properties_dict(self):
         shape_properties_dict = super().get_properties_dict()

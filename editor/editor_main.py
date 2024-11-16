@@ -25,6 +25,7 @@ from node_types.shape import Shape
 from node_types.physics_shape import PhysicsShape
 from node_types.rigid_body import RigidBody
 from node_types.static_body import StaticBody
+from node_types.kinematic_body import KinematicBody
 
 # Load editor resources.
 from resources.button import Button
@@ -61,6 +62,7 @@ class AddNodeDialogue:
         self.physics_shape_button = Button(self.x + 10, self.y + 100, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Physics Shape", (0, 0, 0, 255), "arial", 20) 
         self.rigid_body_button = Button(self.x + 10, self.y + 130, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Rigid Body", (0, 0, 0, 255), "arial", 20) 
         self.static_body_button = Button(self.x + 10, self.y + 160, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Static Body", (0, 0, 0, 255), "arial", 20)
+        self.kinematic_body_button = Button(self.x +10, self.y + 190, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Kinematic Body", (0, 0, 0, 255), "arial", 20)
 
     def update(self):
         raylib.DrawRectangle(self.x, self.y, self.width, self.height, (170, 170, 170, 255))
@@ -75,6 +77,7 @@ class AddNodeDialogue:
         if self.physics_shape_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_PHYSICS_SHAPE
         if self.rigid_body_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_RIGID_BODY
         if self.static_body_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_STATIC_BODY
+        if self.kinematic_body_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_KINEMATIC_BODY
 
         if raylib.IsKeyDown(raylib.KEY_ESCAPE):
             return global_enumerations.EXIT
@@ -296,8 +299,12 @@ class EditorHandler:
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Physics Shape".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 28, 3, raylib.BLACK)
 
         # Velocity tickers.
-        mod_velocity_x_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20, self.selected_node.velocity.x)
-        mod_velocity_y_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 0, 20, self.selected_node.velocity.y)
+        mod_velocity_x_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20, self.selected_node.velocity.x, 5)
+        mod_velocity_y_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 0, 20, self.selected_node.velocity.y, 5)
+
+        # Velocity labels
+        raylib.DrawTextEx(ARIAL_FONT, "Velocity X".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 140 + position_addon.y), 30, 3, raylib.BLACK)
+        raylib.DrawTextEx(ARIAL_FONT, "Velocity Y".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y), 30, 3, raylib.BLACK)
 
         # Update tickers.
         mod_velocity_x_ticker.update()
@@ -320,6 +327,17 @@ class EditorHandler:
         self.selected_node.mass = mod_mass_ticker.value
 
         self._draw_physics_shape_specific_options(pygame.Vector2(position_addon.x, 80 + position_addon.y))
+
+    def _draw_kinematic_body_specific_options(self, position_addon: pygame.Vector2):
+        # Type label.
+        raylib.DrawTextEx(ARIAL_FONT, "Inherits: Kinematic Body".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
+
+        self._draw_physics_shape_specific_options(pygame.Vector2(position_addon.x, 40 + position_addon.y))
+
+    def _draw_static_body_specific_options(self, position_addon: pygame.Vector2):
+        # Type label.
+        raylib.DrawTextEx(ARIAL_FONT, "Inherits: Static Body".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
+        self._draw_physics_shape_specific_options(pygame.Vector2(position_addon.x, 40 + position_addon.y))
 
     def _draw_position_specific_options(self, position_addon: pygame.Vector2):
         # Position label.
@@ -386,6 +404,7 @@ class EditorHandler:
             if self.node_to_add == global_enumerations.NODE_PHYSICS_SHAPE: child = PhysicsShape()
             if self.node_to_add == global_enumerations.NODE_RIGID_BODY: child = RigidBody()
             if self.node_to_add == global_enumerations.NODE_STATIC_BODY: child = StaticBody()
+            if self.node_to_add == global_enumerations.NODE_KINEMATIC_BODY: child = KinematicBody()
             if self.node_to_add == global_enumerations.EXIT:
                 self.adding_node = False
                 self.adding_child = False
@@ -484,6 +503,10 @@ class EditorHandler:
                 self._draw_physics_shape_specific_options(pygame.Vector2(0, 0))
             if self.selected_node.node_type == "RigidBody":
                 self._draw_rigid_body_specific_options(pygame.Vector2(0, 0))
+            if self.selected_node.node_type == "StaticBody":
+                self._draw_static_body_specific_options(pygame.Vector2(0, 0))
+            if self.selected_node.node_type == "KinematicBody":
+                self._draw_kinematic_body_specific_options(pygame.Vector2(0, 0))
 
         # Handle adding new node if we're doing that.
         if self.adding_node:
@@ -542,6 +565,8 @@ class EditorHandler:
                 node_to_add = RigidBody()
             elif node["type"] == "StaticBody":
                 node_to_add = StaticBody()
+            elif node["type"] == "KinematicBody":
+                node_to_add = KinematicBody()
 
             # Nodes loads itself ... will add it's children.
             node_to_add.load_self(node)

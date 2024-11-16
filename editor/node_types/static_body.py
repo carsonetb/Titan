@@ -3,7 +3,7 @@ import pymunk
 import resources.global_enumerations as global_enumerations
 from node_types.physics_shape import PhysicsShape
 
-# TODO: Move some of this code into StaticBody class.
+# TODO: Move some of this code into its own class class.
 class StaticBody(PhysicsShape):
     def __init__(self):
         PhysicsShape.__init__(self)
@@ -24,19 +24,7 @@ class StaticBody(PhysicsShape):
         self.body.angle = self.rotation
 
         if not self.added_to_simulation:
-            if self.shape_index == global_enumerations.SHAPE_RECT:
-                self.shape = pymunk.Poly(self.body, [
-                    (-self.width / 2, self.height / 2),
-                    (self.width / 2, self.height / 2),
-                    (-self.width / 2, -self.height / 2),
-                    (self.width / 2, -self.height / 2)
-                ])
-
-            if self.shape_index == global_enumerations.SHAPE_CIRCLE:
-                self.shape = pymunk.Circle(self.body, self.radius)
-
-            if self.shape_index == global_enumerations.SHAPE_POLYGON:
-                self.shape = pymunk.Poly(self.body, self.points)
+            self.shape = self.generate_shape()
             
             self.shape.friction = 0.9
             self.shape.elasticity = 0.1

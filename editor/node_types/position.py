@@ -121,9 +121,12 @@ class Position:
             elif self.script_has_update:
                 self.script.update(engine_interactable)
             
-            self.position = engine_interactable.position
-            self.rotation = engine_interactable.rotation
-            self.scale = engine_interactable.scale
+            self.update_variables_from_interactable(engine_interactable)
+
+    def update_variables_from_interactable(self, engine_interactable):
+        self.position = engine_interactable.position
+        self.rotation = engine_interactable.rotation
+        self.scale = engine_interactable.scale
         
     def generate_engine_interactable(self):
         return PositionEngineInteractable(

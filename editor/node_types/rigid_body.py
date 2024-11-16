@@ -49,19 +49,7 @@ class RigidBody(PhysicsShape):
         if not self.added_to_simulation:
             self.body.position = (self.global_position.x, self.global_position.y)
 
-            if self.shape_index == global_enumerations.SHAPE_RECT:
-                self.shape = pymunk.Poly(self.body, [
-                    (-self.width / 2, self.height / 2),
-                    (self.width / 2, self.height / 2),
-                    (-self.width / 2, -self.height / 2),
-                    (self.width / 2, -self.height / 2)
-                ])
-
-            if self.shape_index == global_enumerations.SHAPE_CIRCLE:
-                self.shape = pymunk.Circle(self.body, self.radius)
-
-            if self.shape_index == global_enumerations.SHAPE_POLYGON:
-                self.shape = pymunk.Poly(self.body, self.points)
+            self.shape = self.generate_shape()
 
             self.shape.mass = self.mass
             self.shape.friction = 0.9
@@ -73,6 +61,11 @@ class RigidBody(PhysicsShape):
         self.position = pygame.Vector2(self.body.position.x, self.body.position.y) - (pygame.Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
         self.rotation = math.atan2(self.body.rotation_vector.y, self.body.rotation_vector.x)
     
+    def update_variables_from_interactable(self, engine_interactable):
+        super().update_variables_from_interactable(engine_interactable)
+
+        self.body = engine_interactable.body
+
     def generate_engine_interactable(self):
         return RigidBodyEngineInteractable(
             self.children, 

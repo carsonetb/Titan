@@ -5,6 +5,3 @@ class RigidBodyEngineInteractable(ShapeEngineInteractable):
         ShapeEngineInteractable.__init__(self, children, parent, position, global_position, rotation, scale, shape_index, width, height, radius, points, color)
 
         self.body = body
-        
-        
-        

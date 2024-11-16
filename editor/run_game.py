@@ -19,6 +19,7 @@ from node_types.shape import Shape
 from node_types.physics_shape import PhysicsShape
 from node_types.rigid_body import RigidBody
 from node_types.static_body import StaticBody
+from node_types.kinematic_body import KinematicBody
 
 # Run game dependencies.
 from resources import global_enumerations
@@ -56,6 +57,8 @@ def load_scene(filename, project_path):
             node_to_add = RigidBody()
         elif node["type"] == "StaticBody":
             node_to_add = StaticBody()
+        elif node["type"] == "KinematicBody":
+            node_to_add = KinematicBody()
 
         # Nodes loads itself ... will add it's children.
         node_to_add.load_self(node)
@@ -96,6 +99,7 @@ def running_game_process(project_path):
     # Create physics space.
     physics_space = pymunk.Space(True)
     physics_space.gravity = (0, 981)
+    physics_space.collision_bias = 0.5
 
     # pygame.init()
     # screen = pygame.display.set_mode((1000, 700))
@@ -111,7 +115,7 @@ def running_game_process(project_path):
         
         # IMPORTANT: Update all nodes!
         for node in top_level_nodes:
-            if node.node_type == "RigidBody" or node.node_type == "StaticBody":
+            if node.node_type == "RigidBody" or node.node_type == "StaticBody" or node.node_type == "KinematicBody":
                 node.game_update(physics_space)
             else:
                 node.game_update()

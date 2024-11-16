@@ -205,6 +205,16 @@ class Shape(Position):
 
         return unsorted_triangles
 
+    def update_variables_from_interactable(self, engine_interactable: ShapeEngineInteractable):
+        super().update_variables_from_interactable(engine_interactable)
+
+        self.shape_index = engine_interactable.shape_type
+        self.width = engine_interactable.rect_dimensions.x
+        self.height = engine_interactable.rect_dimensions.y
+        self.radius = engine_interactable.circle_radius
+        self.points = engine_interactable.points
+        self.color = engine_interactable.color
+
     def generate_engine_interactable(self):
         return ShapeEngineInteractable(
             self.children, 
