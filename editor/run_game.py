@@ -1,4 +1,5 @@
 import pygame
+import pymunk.pygame_util
 import raylib
 import tkinter
 import tkinter.filedialog
@@ -12,11 +13,12 @@ import pymunk
 pygame.init()
 
 # Load node types
-from node_types.node_types import Position
-from node_types.node_types import Sprite
-from node_types.node_types import Shape
-from node_types.node_types import PhysicsShape
-from node_types.node_types import RigidBody
+from node_types.position import Position
+from node_types.sprite import Sprite
+from node_types.shape import Shape
+from node_types.physics_shape import PhysicsShape
+from node_types.rigid_body import RigidBody
+from node_types.static_body import StaticBody
 
 # Run game dependencies.
 from resources import global_enumerations
@@ -52,6 +54,8 @@ def load_scene(filename, project_path):
             node_to_add = PhysicsShape()
         elif node["type"] == "RigidBody":
             node_to_add = RigidBody()
+        elif node["type"] == "StaticBody":
+            node_to_add = StaticBody()
 
         # Nodes loads itself ... will add it's children.
         node_to_add.load_self(node)
@@ -62,6 +66,11 @@ def load_scene(filename, project_path):
         top_level_nodes.append(node_to_add)
 
     return top_level_nodes
+
+def debug_scene_hierarchy(top_level_nodes, layers=0):
+    for node in top_level_nodes:
+        print("\t" * layers + node.name)
+        debug_scene_hierarchy(node.children, layers + 1)
 
 def running_game_process(project_path):
     # Load project data file.
@@ -86,7 +95,11 @@ def running_game_process(project_path):
 
     # Create physics space.
     physics_space = pymunk.Space(True)
-    physics_space.gravity = (0, -9.81)
+    physics_space.gravity = (0, 981)
+
+    # pygame.init()
+    # screen = pygame.display.set_mode((1000, 700))
+    # draw_options = pymunk.pygame_util.DrawOptions(screen)
 
     # Initialize default scene.
     top_level_nodes = load_scene(project_data["current_scene"], project_path)
@@ -98,13 +111,17 @@ def running_game_process(project_path):
         
         # IMPORTANT: Update all nodes!
         for node in top_level_nodes:
-            if node.node_type == "RigidBody":
+            if node.node_type == "RigidBody" or node.node_type == "StaticBody":
                 node.game_update(physics_space)
             else:
                 node.game_update()
         
         # Step physics simulation.
         physics_space.step(1/60)
+        
+        # screen.fill(pygame.Color("white"))
+        # physics_space.debug_draw(draw_options)
+        # pygame.display.flip()
             
         # Draw debug FPS in the top left corner.
         raylib.DrawFPS(10, 10)

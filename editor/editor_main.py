@@ -24,6 +24,7 @@ from node_types.sprite import Sprite
 from node_types.shape import Shape
 from node_types.physics_shape import PhysicsShape
 from node_types.rigid_body import RigidBody
+from node_types.static_body import StaticBody
 
 # Load editor resources.
 from resources.button import Button
@@ -59,6 +60,7 @@ class AddNodeDialogue:
         self.shape_button = Button(self.x + 10, self.y + 70, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Shape", (0, 0, 0, 255), "arial", 20) 
         self.physics_shape_button = Button(self.x + 10, self.y + 100, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Physics Shape", (0, 0, 0, 255), "arial", 20) 
         self.rigid_body_button = Button(self.x + 10, self.y + 130, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Rigid Body", (0, 0, 0, 255), "arial", 20) 
+        self.static_body_button = Button(self.x + 10, self.y + 160, self.width - 20, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Static Body", (0, 0, 0, 255), "arial", 20)
 
     def update(self):
         raylib.DrawRectangle(self.x, self.y, self.width, self.height, (170, 170, 170, 255))
@@ -72,6 +74,7 @@ class AddNodeDialogue:
         if self.shape_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_SHAPE
         if self.physics_shape_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_PHYSICS_SHAPE
         if self.rigid_body_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_RIGID_BODY
+        if self.static_body_button.update() == global_enumerations.BUTTON_JUST_PRESSED: return global_enumerations.NODE_STATIC_BODY
 
         if raylib.IsKeyDown(raylib.KEY_ESCAPE):
             return global_enumerations.EXIT
@@ -306,7 +309,7 @@ class EditorHandler:
 
         self._draw_shape_specific_options(pygame.Vector2(position_addon.x, 120 + position_addon.y))
 
-    def _draw_rigd_body_specific_options(self, position_addon: pygame.Vector2):
+    def _draw_rigid_body_specific_options(self, position_addon: pygame.Vector2):
         # Type label.
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Rigid Body".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
 
@@ -377,6 +380,7 @@ class EditorHandler:
             if self.node_to_add == global_enumerations.NODE_SHAPE: child = Shape()
             if self.node_to_add == global_enumerations.NODE_PHYSICS_SHAPE: child = PhysicsShape()
             if self.node_to_add == global_enumerations.NODE_RIGID_BODY: child = RigidBody()
+            if self.node_to_add == global_enumerations.NODE_STATIC_BODY: child = StaticBody()
             if self.node_to_add == global_enumerations.EXIT:
                 self.adding_node = False
                 self.adding_child = False
@@ -473,6 +477,8 @@ class EditorHandler:
                 self._draw_shape_specific_options(pygame.Vector2(0, 0))
             if self.selected_node.node_type == "PhysicsShape":
                 self._draw_physics_shape_specific_options(pygame.Vector2(0, 0))
+            if self.selected_node.node_type == "RigidBody":
+                self._draw_rigid_body_specific_options(pygame.Vector2(0, 0))
 
         # Handle adding new node if we're doing that.
         if self.adding_node:
@@ -529,6 +535,8 @@ class EditorHandler:
                 node_to_add = PhysicsShape()
             elif node["type"] == "RigidBody":
                 node_to_add = RigidBody()
+            elif node["type"] == "StaticBody":
+                node_to_add = StaticBody()
 
             # Nodes loads itself ... will add it's children.
             node_to_add.load_self(node)

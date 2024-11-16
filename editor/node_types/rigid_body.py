@@ -16,15 +16,16 @@ class RigidBody(PhysicsShape):
         self.body = pymunk.Body()
         self.added_to_simulation = False
 
+    # Not sure we need to update the shape and stuff in here ...
     def editor_update(self, origin_offset):
         super().editor_update(origin_offset)
 
         if self.shape_index == global_enumerations.SHAPE_RECT:
             self.shape = pymunk.Poly(self.body, [
-                (self.global_position.x - self.width / 2, self.global_position.y - self.height / 2),
-                (self.global_position.x + self.width / 2, self.global_position.y - self.height / 2),
-                (self.global_position.x - self.width / 2, self.global_position.y + self.height / 2),
-                (self.global_position.x + self.width / 2, self.global_position.y + self.height / 2)
+                (self.global_position.x - self.width / 2, -self.global_position.y + self.height / 2),
+                (self.global_position.x + self.width / 2, -self.global_position.y + self.height / 2),
+                (self.global_position.x - self.width / 2, -self.global_position.y - self.height / 2),
+                (self.global_position.x + self.width / 2, -self.global_position.y - self.height / 2)
             ])
             self.shape.mass = self.mass
 
@@ -36,7 +37,7 @@ class RigidBody(PhysicsShape):
             self.shape = pymunk.Poly(self.body, self.points)
             self.shape.mass = self.mass
 
-        self.body.position = (self.global_position.x, self.global_position.y)
+        self.body.position = (self.global_position.x, -self.global_position.y)
         self.body.angle = self.rotation
 
     def game_update(self, pymunk_space: pymunk.Space):
@@ -45,20 +46,25 @@ class RigidBody(PhysicsShape):
         self.body.mass = self.mass
 
         if not self.added_to_simulation:
-            self.body.position = (self.global_position.x, -self.global_position.y)
+            self.body.position = (self.global_position.x, self.global_position.y)
 
             self.shape = pymunk.Poly(self.body, [
-                (self.global_position.x - self.width / 2, -self.global_position.y - self.height / 2),
-                (self.global_position.x + self.width / 2, -self.global_position.y - self.height / 2),
-                (self.global_position.x - self.width / 2, -self.global_position.y + self.height / 2),
-                (self.global_position.x + self.width / 2, -self.global_position.y + self.height / 2)
+                (-self.width / 2, self.height / 2),
+                (self.width / 2, self.height / 2),
+                (-self.width / 2, -self.height / 2),
+                (self.width / 2, -self.height / 2)
             ])
             self.shape.mass = self.mass
+            self.shape.elasticity = 0
+            self.shape.friction = 1
 
+            self.shape.friction = 0.9
+            self.shape.elasticity = 0.1
             pymunk_space.add(self.body, self.shape)
+            
             self.added_to_simulation = True
 
-        self.position = pygame.Vector2(self.body.position.x, -self.body.position.y) - (pygame.Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
+        self.position = pygame.Vector2(self.body.position.x, self.body.position.y) - (pygame.Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
         self.rotation = math.atan2(self.body.rotation_vector.y, self.body.rotation_vector.x)
 
     def get_properties_dict(self):

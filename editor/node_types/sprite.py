@@ -19,7 +19,7 @@ class Sprite(Position):
         offset_position = self.global_position + origin_offset
 
         if self.sprite_path:
-            raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(offset_position.x - (self.image_width * self.scale.x) / 2), int(offset_position.y - (self.image_height * self.scale.y) / 2), self.image_width * self.scale.x, self.image_height * self.scale.y], [0, 0], self.rotation_degrees, raylib.WHITE)
+            raylib.DrawTexturePro(self.image, [0.0, 0.0, self.image_width, self.image_height], [int(offset_position.x), int(offset_position.y), self.image_width * self.scale.x, self.image_height * self.scale.y], [self.image_width / 2 * self.scale.x, self.image_height / 2 * self.scale.y], self.rotation_degrees, raylib.WHITE)
 
     def game_update(self):
         super().game_update()

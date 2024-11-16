@@ -3,6 +3,7 @@ import raylib
 import tripy
 import numpy
 
+import resources.misc
 from resources import global_enumerations
 from resources.button import InvisibleButton
 from node_types.position import Position
@@ -176,7 +177,7 @@ class Shape(Position):
         super().game_update()
 
         if self.shape_index == global_enumerations.SHAPE_RECT:
-            raylib.DrawRectangle(int(self.global_position.x - self.width / 2), int(self.global_position.y - self.height / 2), int(self.width), int(self.height), self.color)
+            raylib.DrawRectanglePro([int(self.global_position.x), int(self.global_position.y), int(self.width), int(self.height)], [self.width / 2, self.height / 2], resources.misc.rad_to_deg(self.rotation), self.color)
         
         if self.shape_index == global_enumerations.SHAPE_CIRCLE:
             raylib.DrawCircle(int(self.global_position.x), int(self.global_position.y), self.radius, self.color)

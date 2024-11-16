@@ -14,9 +14,10 @@ class Position:
         self.node_type = "Position"
         self.position = pygame.Vector2(0, 0)
         self.global_position = pygame.Vector2(0, 0)
-        self.previous_position = pygame.Vector2(0, 0)
         self.scale = pygame.Vector2(1, 1)
         self.previous_scale = pygame.Vector2(1, 1)
+        self.previous_position = pygame.Vector2(0, 0)
+        self.previous_rotation = 0
         self.rotation = 0
         self.rotation_degrees = 0
         self.children = []
@@ -117,11 +118,13 @@ class Position:
         
         for child in self.children:
             child.add_scale(self.scale - self.previous_scale)
+            child.add_rotation(self.rotation - self.previous_rotation)
             child.game_update()
         
         self.global_position = self.get_global_position()
         self.previous_position = copy.copy(self.position)
         self.previous_scale = self.scale
+        self.previous_rotation = self.rotation
     
     def add_position(self, added_position):
         self.position += added_position
@@ -192,6 +195,7 @@ class Position:
             from node_types.shape import Shape
             from node_types.physics_shape import PhysicsShape
             from node_types.rigid_body import RigidBody
+            from node_types.static_body import StaticBody
 
             if child["type"] == "Position":
                 node_to_add = Position()
@@ -204,6 +208,8 @@ class Position:
                 node_to_add = PhysicsShape()
             elif child["type"] == "RigidBody":
                 node_to_add = RigidBody()
+            elif child["type"] == "StaticBody":
+                node_to_add = StaticBody()
 
             node_to_add.load_self(child)
             node_to_add.previous_position = node_to_add.position
