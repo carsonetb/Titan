@@ -7,6 +7,7 @@ import resources.misc
 from resources import global_enumerations
 from resources.button import InvisibleButton
 from node_types.position import Position
+from scripting.shape_engine_interactable import ShapeEngineInteractable
 
 class Shape(Position):
     def __init__(self):
@@ -203,6 +204,22 @@ class Shape(Position):
             unsorted_triangles[triangle] = regular_array
 
         return unsorted_triangles
+
+    def generate_engine_interactable(self):
+        return ShapeEngineInteractable(
+            self.children, 
+            self.parent, 
+            self.position,
+            self.global_position, 
+            self.rotation, 
+            self.scale,
+            self.shape_index,
+            self.width,
+            self.height,
+            self.radius,
+            self.points,
+            self.color,
+        )
 
     def update_polygon_points(self, points):
         self.points_real_positions = points

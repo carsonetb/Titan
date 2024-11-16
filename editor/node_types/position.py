@@ -5,7 +5,7 @@ import sys
 import copy
 
 import resources.misc
-from resources.script_connection_layer import EngineInteractable
+from scripting.position_engine_interactable import PositionEngineInteractable
 
 class Position:
     def __init__(self):
@@ -90,32 +90,8 @@ class Position:
         self.previous_scale = copy.copy(self.scale)
     
     def game_update(self):
-        if self.has_script:
-            if self.script_has_update == "Untested":
-                try: 
-                    self.script.update(raylib.GetFrameTime(), EngineInteractable())
-                    self.script_has_update = True 
-                    try:
-                        self.script.ready()
-                    except:
-                        pass
+        self.script_update()
 
-                except Exception as e:
-                    print(f"WARNING: Failed to run update function on script at {self.script_path}. Exception with error {e}")
-                    self.script_has_update = False
-
-            elif self.script_has_update:
-                self.script.update(raylib.GetFrameTime(), EngineInteractable())
-            
-            if self.script_has_position == "Untested":
-                try: 
-                    self.position = self.script.position
-                    self.script_has_position = True
-                except: 
-                    self.script_has_position = False
-            elif self.script_has_position:
-                self.position = self.script.position
-        
         for child in self.children:
             child.add_scale(self.scale - self.previous_scale)
             child.add_rotation(self.rotation - self.previous_rotation)
@@ -125,6 +101,39 @@ class Position:
         self.previous_position = copy.copy(self.position)
         self.previous_scale = self.scale
         self.previous_rotation = self.rotation
+    
+    def script_update(self):
+        engine_interactable = self.generate_engine_interactable()
+
+        if self.has_script:
+            if self.script_has_update == "Untested":
+                try: 
+                    self.script.update(engine_interactable)
+                    self.script_has_update = True 
+                    try:
+                        self.script.ready(engine_interactable)
+                    except:
+                        pass
+
+                except Exception as e:
+                    self.script_has_update = False
+
+            elif self.script_has_update:
+                self.script.update(engine_interactable)
+            
+            self.position = engine_interactable.position
+            self.rotation = engine_interactable.rotation
+            self.scale = engine_interactable.scale
+        
+    def generate_engine_interactable(self):
+        return PositionEngineInteractable(
+            self.children, 
+            self.parent, 
+            self.position,
+            self.global_position, 
+            self.rotation, 
+            self.scale, 
+        )
     
     def add_position(self, added_position):
         self.position += added_position

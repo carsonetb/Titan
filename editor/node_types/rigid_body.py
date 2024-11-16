@@ -4,6 +4,7 @@ import math
 
 import resources.global_enumerations as global_enumerations
 from node_types.physics_shape import PhysicsShape
+from scripting.rigid_body_engine_interactable import RigidBodyEngineInteractable
 
 class RigidBody(PhysicsShape):
     def __init__(self):
@@ -66,6 +67,23 @@ class RigidBody(PhysicsShape):
 
         self.position = pygame.Vector2(self.body.position.x, self.body.position.y) - (pygame.Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
         self.rotation = math.atan2(self.body.rotation_vector.y, self.body.rotation_vector.x)
+    
+    def generate_engine_interactable(self):
+        return RigidBodyEngineInteractable(
+            self.children, 
+            self.parent, 
+            self.position,
+            self.global_position, 
+            self.rotation, 
+            self.scale,
+            self.shape_index,
+            self.width,
+            self.height,
+            self.radius,
+            self.points,
+            self.color,
+            self.body,
+        )
 
     def get_properties_dict(self):
         shape_properties_dict = super().get_properties_dict()

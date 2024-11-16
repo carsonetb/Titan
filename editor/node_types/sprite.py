@@ -2,6 +2,7 @@ import pygame
 import raylib
 
 from node_types.position import Position
+from scripting.sprite_engine_interactable import SpriteEngineInteractable
 
 class Sprite(Position):
     def __init__(self):
@@ -30,6 +31,19 @@ class Sprite(Position):
             scaled_position = pygame.Vector2(int(self.global_position.x - (self.image_width * self.scale.x) / 2), int(self.global_position.y - (self.image_height * self.scale.y) / 2))
             scaled_dimensions = pygame.Vector2(self.image_width * self.scale.x, self.image_height * self.scale.y)
             raylib.DrawTexturePro(self.image, dimensions, [scaled_position.x, scaled_position.y, scaled_dimensions.x, scaled_dimensions.y], [0, 0], self.rotation_degrees, raylib.WHITE)
+
+    def generate_engine_interactable(self):
+        return SpriteEngineInteractable(
+            self.children, 
+            self.parent, 
+            self.position,
+            self.global_position, 
+            self.rotation, 
+            self.scale, 
+            self.sprite_path,
+            self.image_width,
+            self.image_height,
+        )
 
     def set_texture(self, path):
         self.sprite_path = path
