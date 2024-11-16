@@ -20,6 +20,7 @@ This project is estimated to be 6% finished.
 - Shape: Node for displaying shapes like polygons, lines, circles, and rectangles.
 - PhysicsShape: Inherits Shape and helps handle velocity of physics objects.
 - RigidBody: Inherits PhysicsShape and has rigid collisions.
+- StaticBody: Inherits PhysicsShape and objects can collide with it. The position stays the same.
 
 ## Scripting
 
