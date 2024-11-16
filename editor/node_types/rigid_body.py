@@ -49,16 +49,21 @@ class RigidBody(PhysicsShape):
         if not self.added_to_simulation:
             self.body.position = (self.global_position.x, self.global_position.y)
 
-            self.shape = pymunk.Poly(self.body, [
-                (-self.width / 2, self.height / 2),
-                (self.width / 2, self.height / 2),
-                (-self.width / 2, -self.height / 2),
-                (self.width / 2, -self.height / 2)
-            ])
-            self.shape.mass = self.mass
-            self.shape.elasticity = 0
-            self.shape.friction = 1
+            if self.shape_index == global_enumerations.SHAPE_RECT:
+                self.shape = pymunk.Poly(self.body, [
+                    (-self.width / 2, self.height / 2),
+                    (self.width / 2, self.height / 2),
+                    (-self.width / 2, -self.height / 2),
+                    (self.width / 2, -self.height / 2)
+                ])
 
+            if self.shape_index == global_enumerations.SHAPE_CIRCLE:
+                self.shape = pymunk.Circle(self.body, self.radius)
+
+            if self.shape_index == global_enumerations.SHAPE_POLYGON:
+                self.shape = pymunk.Poly(self.body, self.points)
+
+            self.shape.mass = self.mass
             self.shape.friction = 0.9
             self.shape.elasticity = 0.1
             pymunk_space.add(self.body, self.shape)

@@ -314,7 +314,12 @@ class EditorHandler:
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Rigid Body".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
 
         # Mass ticker.
-        mod_velocity_x_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20, self.selected_node.velocity.x)
+        mod_mass_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20, self.selected_node.mass)
+        mod_mass_ticker.update()
+
+        self.selected_node.mass = mod_mass_ticker.value
+
+        self._draw_physics_shape_specific_options(pygame.Vector2(position_addon.x, 80 + position_addon.y))
 
     def _draw_position_specific_options(self, position_addon: pygame.Vector2):
         # Position label.
