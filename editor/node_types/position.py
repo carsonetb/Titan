@@ -50,7 +50,7 @@ class Position:
         except:
             print(f"Error Loading Script: NODE_TYPE variable does not exist. It should be '{self.node_type}'")
     
-    def editor_update(self, origin_offset):
+    def editor_update(self, origin_offset=pygame.Vector2(0, 0)):
         offset_position = origin_offset + self.global_position
         raylib.DrawCircleLines(int(offset_position.x), int(offset_position.y), 15, (0, 0, 0, 255))
         
@@ -160,6 +160,10 @@ class Position:
             rotated_position = position_to_rotate.rotate_rad(added_rotation)
             child.position = self.position + rotated_position
             child.add_rotation(added_rotation)
+
+    def add_child(self, child):
+        self.children.append(child)
+        child.parent = self
 
     def get_children_recursive(self):
         children = [self]
