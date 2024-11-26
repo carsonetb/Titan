@@ -1,6 +1,6 @@
 import pymunk
 
-import resources.global_enumerations as global_enumerations
+import resources.misc.global_enumerations as global_enumerations
 from node_types.physics_shape import PhysicsShape
 
 # TODO: Move some of this code into its own class class.

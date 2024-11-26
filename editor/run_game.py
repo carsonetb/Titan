@@ -1,16 +1,7 @@
-import pygame
 import pymunk.pygame_util
 import raylib
-import tkinter
-import tkinter.filedialog
-import tkinter.simpledialog
 import json
-import copy
-import multiprocessing
 import pymunk
-
-# Initialise pygame.
-pygame.init()
 
 # Load node types
 from node_types.position import Position
@@ -22,7 +13,7 @@ from node_types.static_body import StaticBody
 from node_types.kinematic_body import KinematicBody
 
 # Run game dependencies.
-from resources import global_enumerations
+from resources.misc import global_enumerations
 
 def load_scene(filename, project_path):
     # Load scene file.

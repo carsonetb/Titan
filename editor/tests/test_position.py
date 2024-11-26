@@ -1,6 +1,6 @@
 from node_types.position import Position
 import tests.test_framework as test_framework
-import pygame
+from resources.math.vector2 import Vector2
 
 def run_tests(framework: test_framework.TestFramework):
 
@@ -8,8 +8,8 @@ def run_tests(framework: test_framework.TestFramework):
 
     test_position = Position()
     framework.check_eq(test_position.node_type, "Position")
-    framework.check_eq(test_position.position, pygame.Vector2(0, 0))
-    framework.check_eq(test_position.scale, pygame.Vector2(1, 1))
+    framework.check_eq(test_position.position, Vector2(0, 0))
+    framework.check_eq(test_position.scale, Vector2(1, 1))
     framework.check_eq(test_position.children, [])
     framework.check_eq(test_position.parent, "Root")
     framework.check_eq(test_position.mouse_dragging, False)
@@ -39,13 +39,13 @@ def run_tests(framework: test_framework.TestFramework):
 
     # TEST UPDATE ENGINE INTERACTABLE
 
-    interactable.position = pygame.Vector2(5, 5)
+    interactable.position = Vector2(5, 5)
     interactable.rotation = 128
-    interactable.scale = pygame.Vector2(0.5, 0.5)
+    interactable.scale = Vector2(0.5, 0.5)
     test_position.update_variables_from_interactable(interactable)
-    framework.check_eq(test_position.position, pygame.Vector2(5, 5))
+    framework.check_eq(test_position.position, Vector2(5, 5))
     framework.check_eq(test_position.rotation, 128)
-    framework.check_eq(test_position.scale, pygame.Vector2(0.5, 0.5))
+    framework.check_eq(test_position.scale, Vector2(0.5, 0.5))
 
     # TEST GLOBAL POSITION
 
@@ -55,23 +55,23 @@ def run_tests(framework: test_framework.TestFramework):
 
     parent.editor_update()
     child.editor_update()
-    framework.check_eq(parent.position, pygame.Vector2(0, 0))
-    framework.check_eq(parent.global_position, pygame.Vector2(0, 0))
-    framework.check_eq(child.position, pygame.Vector2(0, 0))
-    framework.check_eq(child.global_position, pygame.Vector2(0, 0))
+    framework.check_eq(parent.position, Vector2(0, 0))
+    framework.check_eq(parent.global_position, Vector2(0, 0))
+    framework.check_eq(child.position, Vector2(0, 0))
+    framework.check_eq(child.global_position, Vector2(0, 0))
 
-    child.add_position(pygame.Vector2(5, 5))
+    child.add_position(Vector2(5, 5))
     parent.editor_update()
     child.editor_update()
-    framework.check_eq(child.position, pygame.Vector2(5, 5))
-    framework.check_eq(child.global_position, pygame.Vector2(5, 5))
+    framework.check_eq(child.position, Vector2(5, 5))
+    framework.check_eq(child.global_position, Vector2(5, 5))
 
-    parent.add_position(pygame.Vector2(7, 7))
+    parent.add_position(Vector2(7, 7))
     parent.editor_update()
     child.editor_update()
-    framework.check_eq(parent.position, pygame.Vector2(7, 7))
-    framework.check_eq(parent.global_position, pygame.Vector2(7, 7))
-    framework.check_eq(child.position, pygame.Vector2(5, 5))
-    framework.check_eq(child.global_position, pygame.Vector2(12, 12))
+    framework.check_eq(parent.position, Vector2(7, 7))
+    framework.check_eq(parent.global_position, Vector2(7, 7))
+    framework.check_eq(child.position, Vector2(5, 5))
+    framework.check_eq(child.global_position, Vector2(12, 12))
 
 

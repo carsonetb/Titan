@@ -1,7 +1,7 @@
-import pygame
 import pymunk
 
-from resources import global_enumerations
+from resources.math.vector2 import Vector2
+from resources.misc import global_enumerations
 from node_types.shape import Shape
 
 class PhysicsShape(Shape):
@@ -17,7 +17,7 @@ class PhysicsShape(Shape):
         # Velocity of physics shape, for more advanced physics nodes which
         # inherit the base physics shape.
         # If value of this is not zero, this will be initial velocity.
-        self.velocity = pygame.Vector2(0, 0)
+        self.velocity = Vector2(0, 0)
 
     def editor_update(self, origin_offset):
         super().editor_update(origin_offset)
@@ -53,4 +53,4 @@ class PhysicsShape(Shape):
     def load_self(self, node):
         super().load_self(node)
 
-        self.velocity = pygame.Vector2(int(node["vel_x"]), int(node["vel_y"]))
+        self.velocity = Vector2(float(node["vel_x"]), float(node["vel_y"]))

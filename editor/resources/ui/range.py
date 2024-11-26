@@ -1,4 +1,4 @@
-from resources.ticker import Ticker
+from resources.ui.ticker import Ticker
 
 class Range(Ticker):
     def __init__(self, x, y, width, height, border_radius, font_size, init_value, min_val, max_val, increment_value=1):

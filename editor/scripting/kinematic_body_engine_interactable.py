@@ -1,5 +1,4 @@
 from scripting.shape_engine_interactable import ShapeEngineInteractable
-import pygame
 
 class KinematicBodyEngineInteractable(ShapeEngineInteractable):
     def __init__(self, children, parent, position, global_position, rotation, scale, shape_index, width, height, radius, points, color, velocity, use_move_and_slide, use_move_and_collide):

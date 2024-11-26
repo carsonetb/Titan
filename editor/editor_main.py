@@ -1,4 +1,3 @@
-import pygame
 import raylib
 import tkinter
 import tkinter.filedialog
@@ -8,9 +7,6 @@ import json
 import copy
 import multiprocessing
 import os
-
-# Initialise pygame.
-pygame.init()
 
 # Initialise raylib.
 raylib.SetConfigFlags(raylib.FLAG_WINDOW_RESIZABLE)
@@ -28,12 +24,13 @@ from node_types.static_body import StaticBody
 from node_types.kinematic_body import KinematicBody
 
 # Load editor resources.
-from resources.button import Button
-from resources.list import Hierarchy
-from resources.range import Range
-from resources.ticker import Ticker
-from resources import global_enumerations
-import resources.enum
+from resources.ui.button import Button
+from resources.ui.list import Hierarchy
+from resources.ui.range import Range
+from resources.ui.ticker import Ticker
+from resources.ui.enum import EnumSelectionMenu
+from resources.math.vector2 import Vector2
+from resources.misc import global_enumerations
 import resources.misc
 
 # Load game runner.
@@ -44,12 +41,6 @@ if os.path.exists("assets/Arimo-VariableFont_wght.ttf"):
     ARIAL_FONT = raylib.LoadFont(b"assets/Arimo-VariableFont_wght.ttf")
 else:
     ARIAL_FONT = raylib.LoadFont(os.path.join(os.path.dirname(__file__), "Arimo-VariableFont_wght.ttf").encode("utf-8"))
-
-# [DEPRECATED] Create pygame fonts.
-REG_FONT = pygame.font.SysFont("arial", 11)
-TITLE_FONT = pygame.font.SysFont("arial", 40)
-SUBTITLE_FONT = pygame.font.SysFont("arial", 30)
-
 
 class AddNodeDialogue:
     def __init__(self, x, y, width, height):
@@ -90,7 +81,7 @@ class EditorHandler:
         self.background_color = (255, 255, 255, 255)
         self.left_sidebar_width = 300
         self.right_sidebar_width = 330
-        self.origin_offset = pygame.Vector2(self.left_sidebar_width, 50)
+        self.origin_offset = Vector2(self.left_sidebar_width, 50)
         self.project_path = project_path
         self.adding_node = False
         self.adding_child = False
@@ -183,7 +174,7 @@ class EditorHandler:
             else:
                 print("Warning: Invalid sprite path.")
 
-    def _draw_sprite_specific_options(self, position_addon: pygame.Vector2):
+    def _draw_sprite_specific_options(self, position_addon: Vector2):
         # Sprite label.
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Sprite".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
         
@@ -192,9 +183,9 @@ class EditorHandler:
         if mod_texture_button.update() == global_enumerations.BUTTON_JUST_PRESSED:
             self.selected_node.set_texture(tkinter.filedialog.askopenfilename())
 
-        self._draw_position_specific_options(pygame.Vector2(position_addon.x, position_addon.y + 80))
+        self._draw_position_specific_options(Vector2(position_addon.x, position_addon.y + 80))
     
-    def _draw_shape_specific_options(self, position_addon: pygame.Vector2):
+    def _draw_shape_specific_options(self, position_addon: Vector2):
         # Shape label.
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Shape".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
 
@@ -281,7 +272,7 @@ class EditorHandler:
 
         # Enumeration for shape type.
         if not self.shape_type_enum:
-            self.shape_type_enum = resources.enum.EnumSelectionMenu({
+            self.shape_type_enum = EnumSelectionMenu({
                 "Rectangle": global_enumerations.SHAPE_RECT,
                 "Circle": global_enumerations.SHAPE_CIRCLE,
                 "Line": global_enumerations.SHAPE_LINE,
@@ -296,9 +287,9 @@ class EditorHandler:
         if updated_shape_type:
             self.selected_node.shape_index = self.shape_type_enum.enum.enum[self.shape_type_enum.enum.item_selected]
 
-        self._draw_position_specific_options(pygame.Vector2(position_addon.x, dynamic_position_addon_y + position_addon.y))
+        self._draw_position_specific_options(Vector2(position_addon.x, dynamic_position_addon_y + position_addon.y))
 
-    def _draw_physics_shape_specific_options(self, position_addon: pygame.Vector2):
+    def _draw_physics_shape_specific_options(self, position_addon: Vector2):
         # Shape label.
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Physics Shape".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 28, 3, raylib.BLACK)
 
@@ -318,9 +309,9 @@ class EditorHandler:
         self.selected_node.velocity.x = mod_velocity_x_ticker.value
         self.selected_node.velocity.y = mod_velocity_y_ticker.value
 
-        self._draw_shape_specific_options(pygame.Vector2(position_addon.x, 120 + position_addon.y))
+        self._draw_shape_specific_options(Vector2(position_addon.x, 120 + position_addon.y))
 
-    def _draw_rigid_body_specific_options(self, position_addon: pygame.Vector2):
+    def _draw_rigid_body_specific_options(self, position_addon: Vector2):
         # Type label.
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Rigid Body".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
 
@@ -348,20 +339,20 @@ class EditorHandler:
         self.selected_node.friction = mod_friction_range.value
         self.selected_node.bounciness = mod_bounciness_range.value
 
-        self._draw_physics_shape_specific_options(pygame.Vector2(position_addon.x, 160 + position_addon.y))
+        self._draw_physics_shape_specific_options(Vector2(position_addon.x, 160 + position_addon.y))
 
-    def _draw_kinematic_body_specific_options(self, position_addon: pygame.Vector2):
+    def _draw_kinematic_body_specific_options(self, position_addon: Vector2):
         # Type label.
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Kinematic Body".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
 
-        self._draw_physics_shape_specific_options(pygame.Vector2(position_addon.x, 40 + position_addon.y))
+        self._draw_physics_shape_specific_options(Vector2(position_addon.x, 40 + position_addon.y))
 
-    def _draw_static_body_specific_options(self, position_addon: pygame.Vector2):
+    def _draw_static_body_specific_options(self, position_addon: Vector2):
         # Type label.
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Static Body".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
-        self._draw_physics_shape_specific_options(pygame.Vector2(position_addon.x, 40 + position_addon.y))
+        self._draw_physics_shape_specific_options(Vector2(position_addon.x, 40 + position_addon.y))
 
-    def _draw_position_specific_options(self, position_addon: pygame.Vector2):
+    def _draw_position_specific_options(self, position_addon: Vector2):
         # Position label.
         raylib.DrawTextEx(ARIAL_FONT, "Inherits: Position".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 100 + position_addon.y), 30, 3, raylib.BLACK)
 
@@ -412,8 +403,8 @@ class EditorHandler:
                     self.selected_node.load_script(script_file_path)
 
         # Modify values changed by tickers.
-        self.selected_node.add_position(pygame.Vector2(mod_position_x_ticker.value - self.selected_node.position.x, mod_position_y_ticker.value - self.selected_node.position.y))
-        self.selected_node.add_scale(pygame.Vector2(mod_scale_x_ticker.value - self.selected_node.scale.x, mod_scale_y_ticker.value - self.selected_node.scale.y))
+        self.selected_node.add_position(Vector2(mod_position_x_ticker.value - self.selected_node.position.x, mod_position_y_ticker.value - self.selected_node.position.y))
+        self.selected_node.add_scale(Vector2(mod_scale_x_ticker.value - self.selected_node.scale.x, mod_scale_y_ticker.value - self.selected_node.scale.y))
         self.selected_node.add_rotation(resources.misc.deg_to_rad(mod_rotation_ticker.value) - self.selected_node.rotation)
 
     def _update_add_node_dialogue(self):
@@ -516,19 +507,19 @@ class EditorHandler:
         # Draw dedicated menu items for selected object.
         if self.selected_node:
             if self.selected_node.node_type == "Position":
-                self._draw_position_specific_options(pygame.Vector2(0, 0))
+                self._draw_position_specific_options(Vector2(0, 0))
             if self.selected_node.node_type == "Sprite":
-                self._draw_sprite_specific_options(pygame.Vector2(0, 0))
+                self._draw_sprite_specific_options(Vector2(0, 0))
             if self.selected_node.node_type == "Shape":
-                self._draw_shape_specific_options(pygame.Vector2(0, 0))
+                self._draw_shape_specific_options(Vector2(0, 0))
             if self.selected_node.node_type == "PhysicsShape":
-                self._draw_physics_shape_specific_options(pygame.Vector2(0, 0))
+                self._draw_physics_shape_specific_options(Vector2(0, 0))
             if self.selected_node.node_type == "RigidBody":
-                self._draw_rigid_body_specific_options(pygame.Vector2(0, 0))
+                self._draw_rigid_body_specific_options(Vector2(0, 0))
             if self.selected_node.node_type == "StaticBody":
-                self._draw_static_body_specific_options(pygame.Vector2(0, 0))
+                self._draw_static_body_specific_options(Vector2(0, 0))
             if self.selected_node.node_type == "KinematicBody":
-                self._draw_kinematic_body_specific_options(pygame.Vector2(0, 0))
+                self._draw_kinematic_body_specific_options(Vector2(0, 0))
 
         # Handle adding new node if we're doing that.
         if self.adding_node:

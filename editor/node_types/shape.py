@@ -1,11 +1,11 @@
-import pygame
 import raylib
 import tripy
 import numpy
 
-import resources.misc
-from resources import global_enumerations
-from resources.button import InvisibleButton
+from resources.math.vector2 import Vector2
+import resources.misc.misc
+from resources.misc import global_enumerations
+from resources.ui.button import InvisibleButton
 from node_types.position import Position
 from scripting.shape_engine_interactable import ShapeEngineInteractable
 
@@ -78,7 +78,7 @@ class Shape(Position):
                     corner_offset_x = offset_position.x - self.width / 2 - mouse_position.x
                     corner_offset_y = offset_position.y - self.height / 2 - mouse_position.y
 
-                    self.add_position(pygame.Vector2(-corner_offset_x * (1/3), -corner_offset_y * (1/3)))
+                    self.add_position(Vector2(-corner_offset_x * (1/3), -corner_offset_y * (1/3)))
                     self.width += corner_offset_x * (2/3)
                     self.height += corner_offset_y * (2/3)
 
@@ -86,7 +86,7 @@ class Shape(Position):
                     corner_offset_x = mouse_position.x - (offset_position.x + self.width / 2)
                     corner_offset_y = offset_position.y - self.height / 2 - mouse_position.y
 
-                    self.add_position(pygame.Vector2(corner_offset_x * (1/3), -corner_offset_y * (1/3)))
+                    self.add_position(Vector2(corner_offset_x * (1/3), -corner_offset_y * (1/3)))
                     self.width += corner_offset_x * (2/3)
                     self.height += corner_offset_y * (2/3)
 
@@ -94,7 +94,7 @@ class Shape(Position):
                     corner_offset_x = offset_position.x - self.width / 2 - mouse_position.x
                     corner_offset_y = mouse_position.y - (offset_position.y + self.height / 2)
 
-                    self.add_position(pygame.Vector2(-corner_offset_x * (1/3), corner_offset_y * (1/3)))
+                    self.add_position(Vector2(-corner_offset_x * (1/3), corner_offset_y * (1/3)))
                     self.width += corner_offset_x * (2/3)
                     self.height += corner_offset_y * (2/3)
 
@@ -102,7 +102,7 @@ class Shape(Position):
                     corner_offset_x = mouse_position.x - (offset_position.x + self.width / 2)
                     corner_offset_y = mouse_position.y - (offset_position.y + self.height / 2)
 
-                    self.add_position(pygame.Vector2(corner_offset_x * (1/3), corner_offset_y * (1/3)))
+                    self.add_position(Vector2(corner_offset_x * (1/3), corner_offset_y * (1/3)))
                     self.width += corner_offset_x * (2/3)
                     self.height += corner_offset_y * (2/3)
 
@@ -178,7 +178,7 @@ class Shape(Position):
         super().game_update()
 
         if self.shape_index == global_enumerations.SHAPE_RECT:
-            raylib.DrawRectanglePro([int(self.global_position.x), int(self.global_position.y), int(self.width), int(self.height)], [self.width / 2, self.height / 2], resources.misc.rad_to_deg(self.rotation), self.color)
+            raylib.DrawRectanglePro([int(self.global_position.x), int(self.global_position.y), int(self.width), int(self.height)], [self.width / 2, self.height / 2], resources.misc.misc.rad_to_deg(self.rotation), self.color)
         
         if self.shape_index == global_enumerations.SHAPE_CIRCLE:
             raylib.DrawCircle(int(self.global_position.x), int(self.global_position.y), self.radius, self.color)

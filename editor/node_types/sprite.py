@@ -1,6 +1,6 @@
-import pygame
 import raylib
 
+from resources.math.vector2 import Vector2
 from node_types.position import Position
 from scripting.sprite_engine_interactable import SpriteEngineInteractable
 
@@ -28,8 +28,8 @@ class Sprite(Position):
         # Draw sprite to screen.
         if self.sprite_path:
             dimensions = [0.0, 0.0, self.image_width, self.image_height]
-            scaled_position = pygame.Vector2(int(self.global_position.x - (self.image_width * self.scale.x) / 2), int(self.global_position.y - (self.image_height * self.scale.y) / 2))
-            scaled_dimensions = pygame.Vector2(self.image_width * self.scale.x, self.image_height * self.scale.y)
+            scaled_position = Vector2(int(self.global_position.x - (self.image_width * self.scale.x) / 2), int(self.global_position.y - (self.image_height * self.scale.y) / 2))
+            scaled_dimensions = Vector2(self.image_width * self.scale.x, self.image_height * self.scale.y)
             raylib.DrawTexturePro(self.image, dimensions, [scaled_position.x, scaled_position.y, scaled_dimensions.x, scaled_dimensions.y], [0, 0], self.rotation_degrees, raylib.WHITE)
 
     def generate_engine_interactable(self):

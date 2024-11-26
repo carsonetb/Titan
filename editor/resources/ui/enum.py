@@ -1,7 +1,8 @@
 import raylib
-import pygame
-import resources.button
-import resources.list
+
+from resources.math.vector2 import Vector2
+import resources.ui.button
+import resources.ui.list
 
 class EnumStorage:
     def __init__(self, enum: dict, start_item: str):
@@ -15,8 +16,8 @@ class EnumSelectionMenu:
         self.selection_menu = resources.list.List(x, y + height, width)
         self.menu_visible = False
 
-        self.position = pygame.Vector2(x, y)
-        self.dimensions = pygame.Vector2(width, height)
+        self.position = Vector2(x, y)
+        self.dimensions = Vector2(width, height)
         self.border_radius = border_radius
         self.font_size = font_size
 

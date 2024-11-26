@@ -1,6 +1,6 @@
 import pymunk
-import pygame
 
+from resources.math.vector2 import Vector2
 from node_types.physics_shape import PhysicsShape
 from scripting.kinematic_body_engine_interactable import KinematicBodyEngineInteractable
 
@@ -35,7 +35,7 @@ class KinematicBody(PhysicsShape):
 
             self.added_to_simulation = True
         
-        self.position = pygame.Vector2(self.body.position.x, self.body.position.y) - (pygame.Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
+        self.position = Vector2(self.body.position.x, self.body.position.y) - (Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
     
     def update_variables_from_interactable(self, engine_interactable: KinematicBodyEngineInteractable):
         super().update_variables_from_interactable(engine_interactable)

@@ -1,9 +1,9 @@
-import pygame
 import raylib
 import importlib
 import sys
 import copy
 
+from resources.math.vector2 import Vector2
 import resources.misc
 from scripting.position_engine_interactable import PositionEngineInteractable
 
@@ -12,11 +12,11 @@ class Position:
         self.script_path = ""
         self.script = None
         self.node_type = "Position"
-        self.position = pygame.Vector2(0, 0)
-        self.global_position = pygame.Vector2(0, 0)
-        self.scale = pygame.Vector2(1, 1)
-        self.previous_scale = pygame.Vector2(1, 1)
-        self.previous_position = pygame.Vector2(0, 0)
+        self.position = Vector2(0, 0)
+        self.global_position = Vector2(0, 0)
+        self.scale = Vector2(1, 1)
+        self.previous_scale = Vector2(1, 1)
+        self.previous_position = Vector2(0, 0)
         self.previous_rotation = 0
         self.rotation = 0
         self.rotation_degrees = 0
@@ -50,7 +50,7 @@ class Position:
         except:
             print(f"Error Loading Script: NODE_TYPE variable does not exist. It should be '{self.node_type}'")
     
-    def editor_update(self, origin_offset=pygame.Vector2(0, 0)):
+    def editor_update(self, origin_offset=Vector2(0, 0)):
         offset_position = origin_offset + self.global_position
         raylib.DrawCircleLines(int(offset_position.x), int(offset_position.y), 15, (0, 0, 0, 255))
         
@@ -58,7 +58,7 @@ class Position:
             raylib.DrawCircleLines(int(offset_position.x), int(offset_position.y), 18, (0, 0, 0, 255))
 
         mouse_pos = raylib.GetMousePosition()
-        mouse_pos = pygame.Vector2(mouse_pos.x, mouse_pos.y)
+        mouse_pos = Vector2(mouse_pos.x, mouse_pos.y)
 
         if self.selected and offset_position.distance_to(mouse_pos) < 30:
             raylib.DrawCircle(int(offset_position.x), int(offset_position.y), 15, (0, 0, 0, 255))
@@ -74,7 +74,7 @@ class Position:
             self.eligable_for_dragging = False
         
         if self.mouse_dragging:
-            self.position = mouse_pos - origin_offset - (pygame.Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
+            self.position = mouse_pos - origin_offset - (Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
 
         for child in self.children:
             child.add_scale(self.scale - self.previous_scale)
@@ -141,15 +141,15 @@ class Position:
     def add_position(self, added_position):
         self.position += added_position
 
-    def add_scale(self, added_scale: pygame.Vector2):
-        if added_scale == pygame.Vector2(0, 0):
+    def add_scale(self, added_scale: Vector2):
+        if added_scale == Vector2(0, 0):
             return
 
         self.scale += added_scale
 
         for child in self.children:
             child.add_scale(added_scale)
-            child.position += pygame.Vector2((child.position - self.position).x * added_scale.x, (child.position - self.position).y * added_scale.y)
+            child.position += Vector2((child.position - self.position).x * added_scale.x, (child.position - self.position).y * added_scale.y)
 
     def add_rotation(self, added_rotation: float):
         self.rotation += added_rotation
@@ -194,10 +194,10 @@ class Position:
 
     def load_self(self, node):
         self.script_path = node["script_path"]
-        self.position = pygame.Vector2(node["position_x"], node["position_y"])
-        self.scale = pygame.Vector2(node["scale_x"], node["scale_y"])
+        self.position = Vector2(node["position_x"], node["position_y"])
+        self.scale = Vector2(node["scale_x"], node["scale_y"])
         self.rotation = node["rotation"]
-        self.rotation_degrees = resources.misc.rad_to_deg(self.rotation)
+        self.rotation_degrees = resources.misc.misc.rad_to_deg(self.rotation)
         
         self.name = node["name"]
         print(f"INFO: Loaded Position {self.position} name {self.name}")

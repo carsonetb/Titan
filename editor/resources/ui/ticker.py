@@ -1,8 +1,9 @@
 import raylib
-import pygame
-import resources.button
 import os
-from resources import global_enumerations
+
+from resources.math.vector2 import Vector2
+import resources.ui.button
+from resources.misc import global_enumerations
 
 
 if os.path.exists("assets/Arimo-VariableFont_wght.ttf"):
@@ -12,8 +13,8 @@ else:
 
 class Ticker:
     def __init__(self, x, y, width, height, border_radius, font_size, init_value, increment_value = 1):
-        self.position = pygame.Vector2(x, y)
-        self.dimensions = pygame.Vector2(width, height)
+        self.position = Vector2(x, y)
+        self.dimensions = Vector2(width, height)
         self.border_radius = border_radius
         self.font_size = font_size
         self.value = init_value

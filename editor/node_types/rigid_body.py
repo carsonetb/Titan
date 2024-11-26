@@ -1,8 +1,8 @@
-import pygame
 import pymunk
 import math
 
-import resources.global_enumerations as global_enumerations
+from resources.math.vector2 import Vector2
+import resources.misc.global_enumerations as global_enumerations
 from node_types.physics_shape import PhysicsShape
 from scripting.rigid_body_engine_interactable import RigidBodyEngineInteractable
 
@@ -60,7 +60,7 @@ class RigidBody(PhysicsShape):
         self.shape.friction = self.friction
         self.shape.elasticity = self.bounciness
 
-        self.position = pygame.Vector2(self.body.position.x, self.body.position.y) - (pygame.Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
+        self.position = Vector2(self.body.position.x, self.body.position.y) - (Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
         self.rotation = math.atan2(self.body.rotation_vector.y, self.body.rotation_vector.x)
     
     def update_variables_from_interactable(self, engine_interactable):
@@ -69,6 +69,8 @@ class RigidBody(PhysicsShape):
         self.mass = engine_interactable.mass
         self.friction = engine_interactable.friction
         self.bounciness = engine_interactable.bounciness
+        self.body.position = engine_interactable.position
+        self.body.rotation_vector = engine_interactable.rotation
 
     def generate_engine_interactable(self):
         return RigidBodyEngineInteractable(

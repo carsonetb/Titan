@@ -1,7 +1,7 @@
 import raylib
-import resources.timer
+import resources.misc.timer
 import os
-from resources import global_enumerations
+from resources.misc import global_enumerations
 
 
 if os.path.exists("assets/Arimo-VariableFont_wght.ttf"):
@@ -13,7 +13,7 @@ else:
 class Button:
     def __init__(self, x, y, width, height, border_width, border_radius, border_color, fill_color, text, text_color, font_path, font_size):
         self.x, self.y, self.width, self.height, self.border_width, self.border_radius, self.border_color, self.fill_color, self.font_size, self.text, self.text_color = x, y, width, height, border_width, border_radius, border_color, fill_color, font_size, text if not isinstance(text, str) else text.encode("ascii"), text_color
-        self.held_down_timer = resources.timer.Timer(0.5, False, True)
+        self.held_down_timer = resources.misc.timer.Timer(0.5, False, True)
         self.held_down = False
 
     def update(self):
