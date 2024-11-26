@@ -30,6 +30,7 @@ from node_types.kinematic_body import KinematicBody
 # Load editor resources.
 from resources.button import Button
 from resources.list import Hierarchy
+from resources.range import Range
 from resources.ticker import Ticker
 from resources import global_enumerations
 import resources.enum
@@ -114,6 +115,9 @@ class EditorHandler:
 
         # Node UI specific variables.
         self.shape_type_enum = None
+    
+    def _draw_property_label(self, label, y, position_addon):
+        raylib.DrawTextEx(ARIAL_FONT, label.encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, y + position_addon.y), 30, 3, raylib.BLACK)
     
     def _draw_engine_sections(self):
         raylib.DrawRectangle(0, 0, raylib.GetScreenWidth(), 50, (180, 180, 180, 255))
@@ -323,10 +327,28 @@ class EditorHandler:
         # Mass ticker.
         mod_mass_ticker = Ticker(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20, self.selected_node.mass)
         mod_mass_ticker.update()
+        
+        # Friction range.
+        mod_friction_range = Range(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 180 + position_addon.y, 150, 30, 0, 20, self.selected_node.friction, 0, 1, 0.1)
+        mod_friction_range.update()
+
+        # Bounciness range.
+        mod_bounciness_range = Range(raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 220 + position_addon.y, 150, 30, 0, 20, self.selected_node.bounciness, 0, 1, 0.1)
+        mod_bounciness_range.update()
+
+        self._draw_property_label("Mass", 140, position_addon)
+
+        # Friction label.
+        raylib.DrawTextEx(ARIAL_FONT, "Friction".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 180 + position_addon.y), 30, 3, raylib.BLACK)
+
+        # Friction label.
+        raylib.DrawTextEx(ARIAL_FONT, "Bounciness".encode("ascii"), (raylib.GetScreenWidth() - self.right_sidebar_width + 170 + position_addon.x, 220 + position_addon.y), 30, 3, raylib.BLACK)
 
         self.selected_node.mass = mod_mass_ticker.value
+        self.selected_node.friction = mod_friction_range.value
+        self.selected_node.bounciness = mod_bounciness_range.value
 
-        self._draw_physics_shape_specific_options(pygame.Vector2(position_addon.x, 80 + position_addon.y))
+        self._draw_physics_shape_specific_options(pygame.Vector2(position_addon.x, 160 + position_addon.y))
 
     def _draw_kinematic_body_specific_options(self, position_addon: pygame.Vector2):
         # Type label.

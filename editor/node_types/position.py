@@ -200,7 +200,7 @@ class Position:
         self.rotation_degrees = resources.misc.rad_to_deg(self.rotation)
         
         self.name = node["name"]
-        print(f"Loaded Position {self.position} name {self.name}")
+        print(f"INFO: Loaded Position {self.position} name {self.name}")
 
         if self.script_path:
             self.load_script(self.script_path)

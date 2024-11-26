@@ -14,6 +14,8 @@ class RigidBody(PhysicsShape):
         self.node_type = "RigidBody"
 
         self.mass = 10
+        self.friction = 1
+        self.bounciness = 0.1
         self.body = pymunk.Body()
         self.added_to_simulation = False
 
@@ -50,13 +52,13 @@ class RigidBody(PhysicsShape):
             self.body.position = (self.global_position.x, self.global_position.y)
 
             self.shape = self.generate_shape()
-
-            self.shape.mass = self.mass
-            self.shape.friction = 0.9
-            self.shape.elasticity = 0.1
             pymunk_space.add(self.body, self.shape)
             
             self.added_to_simulation = True
+        
+        self.shape.mass = self.mass
+        self.shape.friction = self.friction
+        self.shape.elasticity = self.bounciness
 
         self.position = pygame.Vector2(self.body.position.x, self.body.position.y) - (pygame.Vector2(0, 0) if self.parent == "Root" else self.parent.get_global_position())
         self.rotation = math.atan2(self.body.rotation_vector.y, self.body.rotation_vector.x)
@@ -64,7 +66,9 @@ class RigidBody(PhysicsShape):
     def update_variables_from_interactable(self, engine_interactable):
         super().update_variables_from_interactable(engine_interactable)
 
-        self.body = engine_interactable.body
+        self.mass = engine_interactable.mass
+        self.friction = engine_interactable.friction
+        self.bounciness = engine_interactable.bounciness
 
     def generate_engine_interactable(self):
         return RigidBodyEngineInteractable(
@@ -80,17 +84,23 @@ class RigidBody(PhysicsShape):
             self.radius,
             self.points,
             self.color,
-            self.body,
+            self.mass,
+            self.friction,
+            self.bounciness,
         )
 
     def get_properties_dict(self):
         shape_properties_dict = super().get_properties_dict()
         shape_properties_dict["type"] = "RigidBody"
         shape_properties_dict["mass"] = self.mass
+        shape_properties_dict["friction"] = self.friction
+        shape_properties_dict["bounciness"] = self.bounciness
 
         return shape_properties_dict
     
-    def load_self(self, node):
+    def load_self(self, node: dict):
         super().load_self(node)
 
         self.mass = int(node["mass"])
+        self.friction = float(node["friction"])
+        self.bounciness = float(node["bounciness"])
