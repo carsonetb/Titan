@@ -28,10 +28,10 @@ class Ticker:
         raylib.DrawTextEx(FONT, str(round(self.value, 2)).encode("ascii"), (self.position.x + self.dimensions.x / 2 - text_size.x / 2, self.position.y + self.dimensions.y / 2 - text_size.y / 2), self.font_size, 3, raylib.BLACK)
 
         button_up_size = raylib.MeasureTextEx(FONT, ">".encode("ascii"), self.font_size, 3)
-        button_up = resources.button.Button(self.position.x + self.dimensions.x - button_up_size.x - 5, self.position.y, button_up_size.x + 5, self.dimensions.y, 1, 0.1, raylib.BLACK, raylib.WHITE, ">", raylib.BLACK, "rowar", self.font_size)
+        button_up = resources.ui.button.Button(self.position.x + self.dimensions.x - button_up_size.x - 5, self.position.y, button_up_size.x + 5, self.dimensions.y, 1, 0.1, raylib.BLACK, raylib.WHITE, ">", raylib.BLACK, "rowar", self.font_size)
         
         button_down_size = raylib.MeasureTextEx(FONT, "<".encode("ascii"), self.font_size, 3)
-        button_down = resources.button.Button(self.position.x + self.dimensions.x - button_up_size.x - button_down_size.x - 10, self.position.y, button_up_size.x + 5, self.dimensions.y, 1, 0.1, raylib.BLACK, raylib.WHITE, "<", raylib.BLACK, "rowar", self.font_size)
+        button_down = resources.ui.button.Button(self.position.x + self.dimensions.x - button_up_size.x - button_down_size.x - 10, self.position.y, button_up_size.x + 5, self.dimensions.y, 1, 0.1, raylib.BLACK, raylib.WHITE, "<", raylib.BLACK, "rowar", self.font_size)
 
         if button_up.update() == global_enumerations.BUTTON_JUST_PRESSED:
             self.value += self.increment_value

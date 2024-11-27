@@ -153,7 +153,7 @@ class Position:
 
     def add_rotation(self, added_rotation: float):
         self.rotation += added_rotation
-        self.rotation_degrees = resources.misc.rad_to_deg(self.rotation)
+        self.rotation_degrees = resources.misc.misc.rad_to_deg(self.rotation)
 
         for child in self.children:
             position_to_rotate = child.position - self.position

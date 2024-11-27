@@ -69,8 +69,8 @@ class RigidBody(PhysicsShape):
         self.mass = engine_interactable.mass
         self.friction = engine_interactable.friction
         self.bounciness = engine_interactable.bounciness
-        self.body.position = engine_interactable.position
-        self.body.rotation_vector = engine_interactable.rotation
+        self.body._set_angle(engine_interactable.rotation)
+        self.body.velocity = (engine_interactable.velocity.x, engine_interactable.velocity.y)
 
     def generate_engine_interactable(self):
         return RigidBodyEngineInteractable(
@@ -86,6 +86,7 @@ class RigidBody(PhysicsShape):
             self.radius,
             self.points,
             self.color,
+            Vector2.from_other_vector2(self.body.velocity),
             self.mass,
             self.friction,
             self.bounciness,

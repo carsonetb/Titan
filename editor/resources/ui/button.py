@@ -57,7 +57,7 @@ class Button:
 class InvisibleButton:
     def __init__(self, x, y, width, height):
         self.x, self.y, self.width, self.height = x, y, width, height
-        self.held_down_timer = resources.timer.Timer(0.5, False, True)
+        self.held_down_timer = resources.misc.timer.Timer(0.5, False, True)
         self.held_down = False
 
     def update(self):

@@ -13,7 +13,7 @@ class EnumSelectionMenu:
     def __init__(self, enum: dict, start_item: str, x, y, width, height, border_radius, font_size):
         self.enum = EnumStorage(enum, start_item)
         self.selection_button = None
-        self.selection_menu = resources.list.List(x, y + height, width)
+        self.selection_menu = resources.ui.list.List(x, y + height, width)
         self.menu_visible = False
 
         self.position = Vector2(x, y)
@@ -47,4 +47,4 @@ class EnumSelectionMenu:
         return 0
 
     def reload_button(self):
-        self.selection_button = resources.button.Button(self.position.x, self.position.y, self.dimensions.x, self.dimensions.y, 1, self.border_radius, raylib.BLACK, raylib.WHITE, self.enum.item_selected, raylib.BLACK, "loller", self.font_size)
+        self.selection_button = resources.ui.button.Button(self.position.x, self.position.y, self.dimensions.x, self.dimensions.y, 1, self.border_radius, raylib.BLACK, raylib.WHITE, self.enum.item_selected, raylib.BLACK, "loller", self.font_size)

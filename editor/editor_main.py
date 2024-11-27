@@ -31,7 +31,7 @@ from resources.ui.ticker import Ticker
 from resources.ui.enum import EnumSelectionMenu
 from resources.math.vector2 import Vector2
 from resources.misc import global_enumerations
-import resources.misc
+from resources.misc.misc import *
 
 # Load game runner.
 import run_game
@@ -139,6 +139,9 @@ class EditorHandler:
         save_scene_button = Button(self.left_sidebar_width + 170, 10, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"Save Scene", (0, 0, 0, 255), "arial", 20)
         save_scene_button_clicked = save_scene_button.update() == global_enumerations.BUTTON_JUST_PRESSED
 
+        new_scene_button = Button(self.left_sidebar_width + 330, 10, 150, 30, 1, 0, (0, 0, 0, 255), (255, 255, 255, 255), b"New Scene", (0, 0, 0, 255), "arial", 20)
+        new_scene_button_clicked = new_scene_button.update() == global_enumerations.BUTTON_JUST_PRESSED
+
         if add_node_button_clicked:
             self.adding_node = True
             self.node_dialogue = AddNodeDialogue(200, 200, raylib.GetScreenWidth() - 400, raylib.GetScreenHeight() - 400)
@@ -153,6 +156,11 @@ class EditorHandler:
             
             if scene_save_path:
                 self.save_scene(scene_save_path)
+        
+        if new_scene_button_clicked:
+            self.save_scene(self.get_current_scene())
+            self.top_level_nodes = []
+            self.set_current_scene("")
 
         if add_child_button_clicked and self.selected_node:
             self.adding_node = True
@@ -169,7 +177,7 @@ class EditorHandler:
 
         if load_scene_button_clicked:
             file_path = tkinter.filedialog.askopenfilename()
-            if resources.misc.is_filename_valid(file_path):
+            if is_filename_valid(file_path):
                 self.load_scene(file_path, False)
             else:
                 print("Warning: Invalid sprite path.")
@@ -280,8 +288,6 @@ class EditorHandler:
             }, "Rectangle", raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x, 140 + position_addon.y, 150, 30, 0, 20)
 
         self.shape_type_enum.position.x = raylib.GetScreenWidth() - self.right_sidebar_width + 10 + position_addon.x
-
-        # CURRENTLY WORKING ON NODE DIALOGUE FOR RIGIDBODY!!!
 
         updated_shape_type = self.shape_type_enum.update()
         if updated_shape_type:
@@ -399,13 +405,13 @@ class EditorHandler:
                 script_file_path = tkinter.filedialog.askopenfilename()
 
                 # Attach a script to the node if the path is valid.
-                if resources.misc.is_filename_valid(script_file_path):
+                if is_filename_valid(script_file_path):
                     self.selected_node.load_script(script_file_path)
 
         # Modify values changed by tickers.
         self.selected_node.add_position(Vector2(mod_position_x_ticker.value - self.selected_node.position.x, mod_position_y_ticker.value - self.selected_node.position.y))
         self.selected_node.add_scale(Vector2(mod_scale_x_ticker.value - self.selected_node.scale.x, mod_scale_y_ticker.value - self.selected_node.scale.y))
-        self.selected_node.add_rotation(resources.misc.deg_to_rad(mod_rotation_ticker.value) - self.selected_node.rotation)
+        self.selected_node.add_rotation(deg_to_rad(mod_rotation_ticker.value) - self.selected_node.rotation)
 
     def _update_add_node_dialogue(self):
         self.node_to_add = self.node_dialogue.update()
@@ -533,6 +539,22 @@ class EditorHandler:
         raylib.DrawFPS(10, raylib.GetScreenHeight() - 30)
 
         raylib.EndDrawing()
+    
+    def set_current_scene(self, filename: str):
+        # Set the previously opened scene.
+        project_global_data_file = open(self.project_path + "/data.json", "r")
+        project_global_data = json.load(project_global_data_file)
+        project_global_data["current_scene"] = filename
+        project_global_data_file.close()
+
+        # Write to data file.
+        project_global_data_file = open(self.project_path + "/data.json", "w")
+        project_global_data_file.write(str(project_global_data).replace("'", '"'))
+        
+    def get_current_scene(self) -> str:
+        project_global_data_file = open(self.project_path + "/data.json", "r")
+        project_global_data = json.load(project_global_data_file)
+        return project_global_data["current_scene"]
 
     def load_scene(self, filename, save_scene=True):
         # Save scene before loading another one.
@@ -544,24 +566,20 @@ class EditorHandler:
         try: 
             scene_file = open(filename, "r")
         except Exception as e:
-            tkinter.messagebox.showerror("Scene load error!", f"Scene load filepath is invalid. Filepath is {filename}. Exit with error {e}")
-
+            print(f"ERROR: Invalid filepath {filename}, loading failed. Error {e}")
             return global_enumerations.EXIT_ERRORS_FATAL
 
-        data = json.load(scene_file)
+        try:
+            data = json.load(scene_file)
+        except:
+            tkinter.messagebox.showerror("Scene load error!", f"Scene load file has invalid json. Filepath is {filename}.")
+            return global_enumerations.EXIT_ERRORS_FATAL
 
         # Clear nodes.
         self.top_level_nodes = []
 
-        # Set the previously opened scene.
-        project_global_data_file = open(self.project_path + "/data.json", "r")
-        project_global_data = json.load(project_global_data_file)
-        project_global_data["current_scene"] = filename
-        project_global_data_file.close()
-
-        # Write to data file.
-        project_global_data_file = open(self.project_path + "/data.json", "w")
-        project_global_data_file.write(str(project_global_data).replace("'", '"'))
+        # Set current scene so it can be loaded and auto-saved later.
+        self.set_current_scene(filename)
 
         # Loop through top level nodes and add them in ...
         # nodes will add their own children.

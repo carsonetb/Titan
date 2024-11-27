@@ -5,15 +5,21 @@ class Vector2:
         self.x = x
         self.y = y
 
+    def from_other_vector2(other):
+        return Vector2(other.x, other.y)
+
+    def from_array(other):
+        return Vector2(other[0], other[1])
+
     def normalize(self):
         length = self.length()
         return Vector2(self.x / length, self.y / length)
     
     def length(self) -> float:
-        return math.sqrt(self.x^2 + self.y^2)
+        return math.sqrt(self.x**2 + self.y**2)
 
     def distance_to(self, to) -> float:
-        return math.sqrt((to.x - self.x)^2 + (to.y - self.y)^2)
+        return math.sqrt((to.x - self.x)**2 + (to.y - self.y)**2)
 
     def to_angle(self) -> float:
         return math.atan2(self.y, self.x)
