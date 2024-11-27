@@ -4,9 +4,17 @@
 
 The Titan Game Engine is a 2D game engine aimed at 
 creating linear, level-based games. It is created
-by Carson Bates for Epimetheus games. 
+by Carson Bates.
 
 This project is estimated to be 6% finished.
+
+## Python's Slow, Right?
+
+That's what you might think, but in the editor you can
+get 5000+ FPS, and you can get more in a game. How? The
+project wraps two C libraries which handle rendering and
+physics (Raylib and Chipmunk). Only the high level logic
+is done in Python, making it pretty fast.
 
 ## Links
 
