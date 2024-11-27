@@ -145,9 +145,18 @@ class EngineInteractable:
     GAMEPAD_AXIS_LEFT_TRIGGER = 4
     GAMEPAD_AXIS_RIGHT_TRIGGER = 5
 
-    def __init__(self, children, parent):
+    # I'm going to regret not putting name in here but I'm
+    # too lazy to move everything over.
+    def __init__(self, children: list, parent):
         self.children = children
         self.parent = parent
+    
+    # TODO: Actually build logic for this.
+    def add_child(self, child):
+        self.children.append(child)
+    
+    def remove_child(self, child):
+        self.children.remove(child)
 
     def is_key_pressed(self, key_index):
         return raylib.IsKeyDown(key_index)
