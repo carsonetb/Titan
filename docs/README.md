@@ -8,11 +8,11 @@ by Carson Bates.
 
 This project is estimated to be 6% finished.
 
-## Python's Slow, Right?
+## Speed
 
-That's what you might think, but in the editor you can
-get 5000+ FPS, and you can get more in a game. How? The
-project wraps two C libraries which handle rendering and
+In general python is pretty slow but in a game you can
+get 5000+ FPS. How? The project wraps two C libraries 
+which handle rendering and
 physics (Raylib and Chipmunk). Only the high level logic
 is done in Python, making it pretty fast.
 
