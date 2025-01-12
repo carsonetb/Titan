@@ -6,7 +6,7 @@ The Titan Game Engine is a 2D game engine aimed at
 creating linear, level-based games. It is created
 by Carson Bates.
 
-This project is estimated to be 6% finished.
+I estimate this project is estimated to be 6% finished, so half that and you have an optimistic estimate!
 
 ## Speed
 
