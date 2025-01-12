@@ -8,18 +8,7 @@ by Carson Bates.
 
 I estimate this project is estimated to be 6% finished, so half that and you have an optimistic estimate!
 
-## Speed
-
-In general python is pretty slow but in a game you can
-get 5000+ FPS. How? The project wraps two C libraries 
-which handle rendering and
-physics (Raylib and Chipmunk). Only the high level logic
-is done in Python, making it pretty fast.
-
-## Links
-
-- Github: https://github.com/EpimetheusGames/Titan
-- Email: epimetheusgamesogpc@gmail.com
+If you have any questions you can email me at blackhole243243@gmail.com
 
 ## Nodes
 
